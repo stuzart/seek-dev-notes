@@ -278,21 +278,177 @@ The parent resource's `PolicyBasedAuthorization` still gates overall access; ver
 
 ## Enabling Git Versioning on a Model
 
-Only `Workflow` currently uses git versioning, but the mechanism is generic. To enable it on another model:
+Only `Workflow` currently uses git versioning, but the mechanism is generic. This section covers everything needed to wire it up on a new model and migrate any existing content-blob versions.
+
+### Prerequisites
+
+Git support must be enabled in SEEK's admin settings. It is off by default:
+
+```ruby
+# config/initializers/seek_configuration.rb
+Seek::Config.default :git_support_enabled, false
+```
+
+Enable it via the SEEK admin UI or by setting `git_support_enabled` to `true` in `db/seeds/` / `seek_settings`. Once enabled, the `after_create :save_git_version_on_create` callback fires for new records.
+
+The git filestore lives at `Seek::Config.git_filestore_path`, which resolves to `{filestore_path}/git/`. Ensure this directory exists and is writable before running any migration.
+
+### 1. Call `git_versioning` in the model
+
+`lib/git/versioning.rb` defines the `git_versioning` class macro. Call it inside your model, before or after `acts_as_asset` (order does not matter):
 
 ```ruby
 class MyAsset < ApplicationRecord
+  acts_as_asset
+
   git_versioning(sync_ignore_columns: ['some_transient_column']) do
-    # optional: extend the generated MyAsset::Git::Version class here
+    # This block is class_eval'd on the generated MyAsset::Git::Version class.
+    # Add callbacks, validations, or methods specific to this asset's versions here.
+    # See Workflow for a real example (WorkflowExtraction, DOI minting, etc.)
   end
 end
 ```
 
-This single call wires up:
-- `has_one :local_git_repository`
-- `has_many :git_versions`
-- All version-navigation helpers (`git_version`, `latest_git_version`, etc.)
-- The compatibility shim so existing `versions`/`version` call sites keep working
+`git_versioning` is idempotent — a second call is silently ignored.
+
+**What it wires up:**
+
+| Added to the model | Purpose |
+|---|---|
+| `has_one :local_git_repository` | The bare git repo on disk |
+| `has_many :git_versions` | All version records |
+| `after_create :save_git_version_on_create` | Creates the first `Git::Version` on save |
+| `after_update :sync_resource_attributes` | Keeps the latest version's JSON snapshot in sync |
+| `is_git_versioned?` | Returns `true` if any git versions exist |
+| `git_version` / `latest_git_version` | Version accessors |
+| `save_as_new_git_version` | Creates a new version from the current resource state |
+| `visible_git_versions(user)` | Filters versions by visibility for a user |
+
+A nested `MyAsset::Git::Version` class is also created, inheriting from `Git::Version`. This is the class for the `git_versions` association. The block passed to `git_versioning` is `class_eval`'d on it.
+
+**`sync_ignore_columns`**
+
+Attributes listed here are excluded from the `resource_attributes` JSON snapshot stored on each `Git::Version`. Use it for columns that are transient, computed, or should not be pinned per-version. `Git::Version` always ignores `id`, `version`, `doi`, `visibility`, `created_at`, and `updated_at` regardless of this option.
+
+Workflow uses:
+
+```ruby
+git_versioning(sync_ignore_columns: ['test_status']) do
+  # ...
+end
+```
+
+### 2. Include `VersioningCompatibility`
+
+If the model also has `explicit_versioning` (i.e. it already has `standard_versions` from `ContentBlob`-backed versioning), include the compatibility shim so the rest of the codebase's `versions`, `latest_version`, `find_version`, etc. calls keep working without knowing which backend is in use:
+
+```ruby
+class MyAsset < ApplicationRecord
+  include Git::VersioningCompatibility
+  # ...
+end
+```
+
+The shim delegates to `git_versions` when `is_git_versioned?` returns true, and to `standard_versions` otherwise.
+
+### 3. Create a migration
+
+Add a migration to create the `git_repositories` and `git_versions` tables if they don't already exist (they do in a full SEEK install), and to add any asset-specific foreign keys or indexes.
+
+At minimum you may need to ensure `Git::Repository` and `Git::Version` have the correct polymorphic associations for the new type — these are already polymorphic, so no schema changes are required for new resource types.
+
+### 4. Migrating existing ContentBlob versions with `Git::Converter`
+
+`Git::Converter` (`lib/git/converter.rb`) converts a single asset from ContentBlob versioning to git. For each `standard_version`:
+
+- Creates or reuses the asset's `Git::Repository`
+- Creates a `Git::Version` with matching `name`, `comment`, `doi`, `visibility`, `contributor_id`, and timestamps
+- Snapshots all versioned attributes into `resource_attributes`
+- Imports all content blobs as git-committed files, preserving authorship and commit time
+- If `unzip: true`, unzips any `.zip` blobs (e.g. RO-Crate zips) before committing the contained files
+- Sets `mutable: false` on all versions except the latest
+
+**Marking the latest version mutable:**
+
+```ruby
+# The latest standard version becomes the one mutable git version
+git_version.mutable = version.version == version.versions.maximum(:version)
+```
+
+**Running the converter for a single asset:**
+
+```ruby
+asset = MyAsset.find(123)
+Git::Converter.new(asset).convert(unzip: true)
+```
+
+Pass `overwrite: true` to destroy an existing `Git::Repository` and re-convert from scratch:
+
+```ruby
+Git::Converter.new(asset).convert(unzip: true, overwrite: true)
+```
+
+**Running a bulk migration:**
+
+The existing Workflow migration rake task is the reference implementation. Write an equivalent for the new model:
+
+```ruby
+# lib/tasks/seek.rake (add alongside convert_workflows_to_git)
+desc "Convert MyAssets to use git backend"
+task convert_my_assets_to_git: :environment do
+  puts 'Converting MyAssets to git:'
+  count = 0
+  gv_before = Git::Version.count
+  gr_before = Git::Repository.count
+
+  MyAsset.includes(:git_versions).find_each do |asset|
+    begin
+      Git::Converter.new(asset).convert(unzip: true)
+      print '.'
+    rescue StandardError => e
+      print 'E'
+      warn "Error converting MyAsset #{asset.id}: #{e.message}"
+      e.backtrace.each { |l| warn l }
+    end
+    count += 1
+  end
+
+  puts
+  puts "Converted #{count} MyAssets"
+  puts "Created #{Git::Repository.count - gr_before} GitRepositories"
+  puts "Created #{Git::Version.count - gv_before} GitVersions"
+end
+```
+
+Run it:
+
+```bash
+bundle exec rails seek:convert_my_assets_to_git
+```
+
+### Conversion flow
+
+```mermaid
+flowchart TD
+    A[MyAsset.find_each] --> B[Git::Converter.new asset]
+    B --> C{local_git_repository\nexists?}
+    C -- No --> D[create Git::Repository\nmkdir uuid/.git]
+    C -- Yes --> D
+    D --> E[standard_versions.order :version]
+    E --> F[For each standard version]
+    F --> G[Build Git::Version\ncopy metadata + timestamps]
+    G --> H{unzip?\nand .zip blob?}
+    H -- Yes --> I[Unzip via ROCrate::Reader\nadd individual files]
+    H -- No --> J[add_file blob.original_filename]
+    I --> K[Rugged commit\nwith original author + time]
+    J --> K
+    K --> L{Latest version?}
+    L -- Yes --> M[mutable: true]
+    L -- No --> N[mutable: false]
+    M --> O[git_version.save!]
+    N --> O
+    O --> F
+```
 
 ---
 
