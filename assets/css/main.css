@@ -182,7 +182,72 @@ mark { background: #fef08a; color: inherit; border-radius: 2px; }
   flex: 1;
   margin-left: var(--sidebar-width);
   padding: 2.5rem 3rem;
-  max-width: 860px;
+  max-width: 1100px;
+}
+
+/* Doc page with TOC */
+.doc-wrap {
+  display: flex;
+  gap: 2.5rem;
+  align-items: flex-start;
+}
+
+.doc-wrap .doc {
+  flex: 1;
+  min-width: 0;
+}
+
+.toc-sidebar {
+  width: 200px;
+  flex-shrink: 0;
+  position: sticky;
+  top: calc(var(--header-height) + 1.5rem);
+  max-height: calc(100vh - var(--header-height) - 3rem);
+  overflow-y: auto;
+}
+
+.toc-label {
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-muted);
+  margin-bottom: 0.6rem;
+}
+
+.toc-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.toc-item { margin: 0; }
+
+.toc-h3 { padding-left: 0.75rem; }
+
+.toc-link {
+  display: block;
+  padding: 0.25rem 0;
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  text-decoration: none;
+  line-height: 1.4;
+  border-left: 2px solid transparent;
+  padding-left: 0.6rem;
+  transition: color 0.1s, border-color 0.1s;
+}
+
+.toc-h3 .toc-link { padding-left: 1.25rem; }
+
+.toc-link:hover { color: var(--text); text-decoration: none; }
+
+.toc-link.active {
+  color: var(--accent);
+  border-left-color: var(--accent);
+}
+
+@media (max-width: 1100px) {
+  .toc-sidebar { display: none; }
 }
 
 /* Index page */
