@@ -1,7 +1,7 @@
 ---
-title: Git backend
-description: git backend
-categories: [Git, WorkflowHub, Data]
+title: Git Versioning Backend
+description: Architecture and internals of SEEK's git-based versioning system for Workflows and other assets.
+categories: [Architecture, Git]
 ---
 
 # Git Backend Developer Documentation
