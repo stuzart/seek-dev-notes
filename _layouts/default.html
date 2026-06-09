@@ -21,14 +21,25 @@
     <nav class="sidebar">
       <a href="{{ '/' | relative_url }}" class="nav-home {% if page.url == '/' %}active{% endif %}">Home</a>
 
-      {% assign docs_by_category = site.docs | group_by: "category" | sort: "name" %}
-      {% for category in docs_by_category %}
-        <div class="nav-category">{{ category.name }}</div>
-        {% assign sorted_docs = category.items | sort: "title" %}
+      {% assign all_categories = "" | split: "" %}
+      {% for doc in site.docs %}
+        {% for cat in doc.categories %}
+          {% unless all_categories contains cat %}
+            {% assign all_categories = all_categories | push: cat %}
+          {% endunless %}
+        {% endfor %}
+      {% endfor %}
+      {% assign all_categories = all_categories | sort %}
+      {% assign sorted_docs = site.docs | sort: "title" %}
+
+      {% for cat in all_categories %}
+        <div class="nav-category">{{ cat }}</div>
         {% for doc in sorted_docs %}
-          <a href="{{ doc.url | relative_url }}" class="nav-link {% if page.url == doc.url %}active{% endif %}">
-            {{ doc.title }}
-          </a>
+          {% if doc.categories contains cat %}
+            <a href="{{ doc.url | relative_url }}" class="nav-link {% if page.url == doc.url %}active{% endif %}">
+              {{ doc.title }}
+            </a>
+          {% endif %}
         {% endfor %}
       {% endfor %}
     </nav>

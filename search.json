@@ -6,7 +6,7 @@ layout: none
   {% for doc in all_docs %}
   {
     "title": {{ doc.title | jsonify }},
-    "category": {{ doc.category | jsonify }},
+    "categories": {{ doc.categories | jsonify }},
     "description": {{ doc.description | jsonify }},
     "url": {{ doc.url | relative_url | jsonify }},
     "content": {{ doc.content | strip_html | strip_newlines | truncate: 5000 | jsonify }}

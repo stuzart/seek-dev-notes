@@ -1,7 +1,7 @@
 ---
 title: Project Structure
 description: A map of every directory and file in this documentation site and what each one does.
-category: Reference
+categories: [Reference]
 ---
 
 ## Directory overview
@@ -42,11 +42,11 @@ Drop any `.md` file here and it becomes a doc page. Every file needs this front 
 ---
 title: Your Page Title
 description: One-line summary (shown on index cards).
-category: SomeCategory
+categories: [Guide, Reference]
 ---
 ```
 
-No other configuration needed — the sidebar, index, and search all update automatically.
+`categories` is a YAML array — a doc can belong to multiple categories and will appear under each one. No other configuration needed — the sidebar, index, and search all update automatically.
 
 ### `_layouts/default.html`
 

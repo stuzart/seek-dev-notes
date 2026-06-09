@@ -1,7 +1,7 @@
 ---
 title: Getting Started
 description: How to set up, run, and add content to this documentation site.
-category: Guide
+categories: [Guide]
 ---
 
 ## Prerequisites
@@ -44,7 +44,7 @@ The site will be available at `http://localhost:4000`. Jekyll watches for file c
    ---
    title: My New Doc
    description: A short summary shown on the index card.
-   category: Guide
+   categories: [Guide]
    ---
    ```
 
@@ -54,7 +54,11 @@ That's it. Jekyll picks up the file automatically and adds it to the sidebar and
 
 ## Categories
 
-The `category:` field in front matter controls how docs are grouped on the index page and in the sidebar. Use any string — docs with the same category are grouped together, sorted alphabetically.
+The `categories:` field in front matter controls how docs are grouped on the index page and in the sidebar. A doc can belong to multiple categories — it will appear under each one. Use a YAML array:
+
+```yaml
+categories: [Guide, Reference]
+```
 
 Common categories used in this site:
 

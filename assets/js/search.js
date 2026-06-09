@@ -25,7 +25,7 @@
         (doc.title && doc.title.toLowerCase().includes(q)) ||
         (doc.description && doc.description.toLowerCase().includes(q)) ||
         (doc.content && doc.content.toLowerCase().includes(q)) ||
-        (doc.category && doc.category.toLowerCase().includes(q))
+        (doc.categories && doc.categories.some(c => c.toLowerCase().includes(q)))
       )
       .slice(0, 8)
       .map(doc => {
@@ -49,7 +49,7 @@
       resultsBox.innerHTML = results.map(r => `
         <a href="${r.url}" class="search-result-item">
           <div class="result-title">${highlight(r.title, query)}</div>
-          ${r.category ? `<div class="result-category">${r.category}</div>` : ''}
+          ${r.categories && r.categories.length ? `<div class="result-category">${r.categories.join(', ')}</div>` : ''}
           ${r.snippet ? `<div class="result-snippet">${highlight(r.snippet, query)}</div>` : ''}
         </a>
       `).join('');
