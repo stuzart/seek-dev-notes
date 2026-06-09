@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% if page.title %}{{ page.title }} | {% endif %}{{ site.title }}</title>
+  <link rel="stylesheet" href="{{ '/assets/css/main.css' | relative_url }}">
+</head>
+<body>
+  <header class="site-header">
+    <div class="header-inner">
+      <a href="{{ '/' | relative_url }}" class="site-title">{{ site.title }}</a>
+      <div class="search-wrap">
+        <input type="text" id="search-input" placeholder="Search docs…" autocomplete="off">
+        <div id="search-results" class="search-results" hidden></div>
+      </div>
+    </div>
+  </header>
+
+  <div class="layout">
+    <nav class="sidebar">
+      <a href="{{ '/' | relative_url }}" class="nav-home {% if page.url == '/' %}active{% endif %}">Home</a>
+
+      {% assign docs_by_category = site.docs | group_by: "category" | sort: "name" %}
+      {% for category in docs_by_category %}
+        <div class="nav-category">{{ category.name }}</div>
+        {% assign sorted_docs = category.items | sort: "title" %}
+        {% for doc in sorted_docs %}
+          <a href="{{ doc.url | relative_url }}" class="nav-link {% if page.url == doc.url %}active{% endif %}">
+            {{ doc.title }}
+          </a>
+        {% endfor %}
+      {% endfor %}
+    </nav>
+
+    <main class="content">
+      {{ content }}
+    </main>
+  </div>
+
+  <script>
+    const SEARCH_DATA_URL = '{{ "/search.json" | relative_url }}';
+  </script>
+  <script src="{{ '/assets/js/search.js' | relative_url }}"></script>
+</body>
+</html>

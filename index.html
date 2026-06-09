@@ -1,0 +1,24 @@
+---
+layout: default
+title: Documentation
+---
+<div class="index-page">
+  <h1>Documentation</h1>
+  <p class="index-intro">{{ site.description }}</p>
+
+  {% assign docs_by_category = site.docs | group_by: "category" | sort: "name" %}
+  {% for category in docs_by_category %}
+    <section class="category-section">
+      <h2 class="category-heading">{{ category.name }}</h2>
+      <div class="doc-grid">
+        {% assign sorted_docs = category.items | sort: "title" %}
+        {% for doc in sorted_docs %}
+          <a href="{{ doc.url | relative_url }}" class="doc-card">
+            <h3>{{ doc.title }}</h3>
+            {% if doc.description %}<p>{{ doc.description }}</p>{% endif %}
+          </a>
+        {% endfor %}
+      </div>
+    </section>
+  {% endfor %}
+</div>
