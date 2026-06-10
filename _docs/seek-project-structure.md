@@ -133,10 +133,17 @@ Config: `config/sunspot.yml`, `solr/`
 
 ## Testing
 
-| Directory | Framework | Coverage |
-|---|---|---|
-| `spec/` | RSpec | Unit and integration tests; most new tests go here |
-| `test/` | Minitest | Older functional/integration tests |
-| `test/functional/` | Minitest | Controller tests for most resource types |
+Minitest (`test/`) is the primary test suite. RSpec (`spec/`) exists but is very small.
 
-Run the full suite with `bundle exec rake test` or `bundle exec rspec`.
+| Directory | Coverage |
+|---|---|
+| `test/unit/` | Model and lib unit tests |
+| `test/functional/` | Controller tests for most resource types |
+| `test/integration/` | End-to-end flows: API, RDF responses, git workflows, OAuth, routing |
+| `test/mailers/` | Mailer tests |
+| `test/factories/` | FactoryBot factory definitions shared across both suites |
+| `test/vcr_cassettes/` | Recorded HTTP interactions for external service tests |
+| `spec/models/` | Small number of RSpec model specs |
+| `spec/seek/search/` | RSpec search specs |
+
+Run the Minitest suite with `bundle exec rake test`.
