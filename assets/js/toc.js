@@ -50,3 +50,57 @@
     });
   });
 })();
+
+(function () {
+  const q = new URLSearchParams(window.location.search).get('highlight');
+  if (!q) return;
+
+  const content = document.querySelector('.doc-body');
+  if (!content) return;
+
+  const escaped = q.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  const re = new RegExp(`(${escaped})`, 'gi');
+
+  const walker = document.createTreeWalker(content, NodeFilter.SHOW_TEXT, {
+    acceptNode(node) {
+      const tag = node.parentElement && node.parentElement.tagName.toLowerCase();
+      return (tag === 'script' || tag === 'style' || tag === 'pre' || tag === 'code')
+        ? NodeFilter.FILTER_REJECT
+        : NodeFilter.FILTER_ACCEPT;
+    }
+  });
+
+  const hits = [];
+  let node;
+  while ((node = walker.nextNode())) {
+    if (re.test(node.textContent)) hits.push(node);
+    re.lastIndex = 0;
+  }
+
+  hits.forEach(node => {
+    const parts = node.textContent.split(re);
+    if (parts.length <= 1) return;
+    const frag = document.createDocumentFragment();
+    parts.forEach(part => {
+      if (re.test(part)) {
+        const mark = document.createElement('mark');
+        mark.className = 'search-highlight';
+        mark.textContent = part;
+        frag.appendChild(mark);
+      } else {
+        frag.appendChild(document.createTextNode(part));
+      }
+      re.lastIndex = 0;
+    });
+    node.parentNode.replaceChild(frag, node);
+  });
+
+  // Scroll to first highlight (after browser handles the #anchor)
+  setTimeout(() => {
+    const first = content.querySelector('mark.search-highlight');
+    if (first) first.scrollIntoView({ block: 'center', behavior: 'smooth' });
+  }, 50);
+
+  // Clean ?highlight= from the URL without a page reload
+  history.replaceState(null, '', window.location.pathname + window.location.hash);
+})();
