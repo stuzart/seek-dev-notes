@@ -12,14 +12,36 @@
     .catch(() => {});
 
   function highlight(text, query) {
-    if (!query) return text;
+    if (!query || !text) return text || '';
     const escaped = query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
     return text.replace(new RegExp(escaped, 'gi'), m => `<mark>${m}</mark>`);
+  }
+
+  function snippet(text, query, context) {
+    if (!text) return '';
+    const idx = text.toLowerCase().indexOf(query.toLowerCase());
+    if (idx === -1) return text.slice(0, context) + (text.length > context ? '…' : '');
+    const start = Math.max(0, idx - 60);
+    const end = Math.min(text.length, idx + 120);
+    return (start > 0 ? '…' : '') + text.slice(start, end) + (end < text.length ? '…' : '');
+  }
+
+  function bestSection(doc, q) {
+    if (!doc.sections || !doc.sections.length) return null;
+    let best = null, bestScore = 0;
+    for (const s of doc.sections) {
+      const headingHit = s.heading && s.heading.toLowerCase().includes(q) ? 2 : 0;
+      const bodyHit = s.body && s.body.toLowerCase().includes(q) ? 1 : 0;
+      const score = headingHit + bodyHit;
+      if (score > bestScore) { bestScore = score; best = s; }
+    }
+    return best;
   }
 
   function search(query) {
     if (!query || query.length < 2) return [];
     const q = query.toLowerCase();
+
     return docs
       .filter(doc =>
         (doc.title && doc.title.toLowerCase().includes(q)) ||
@@ -29,16 +51,25 @@
       )
       .slice(0, 8)
       .map(doc => {
-        let snippet = '';
-        if (doc.content) {
-          const idx = doc.content.toLowerCase().indexOf(q);
-          if (idx !== -1) {
-            const start = Math.max(0, idx - 60);
-            const end = Math.min(doc.content.length, idx + 120);
-            snippet = (start > 0 ? '…' : '') + doc.content.slice(start, end) + (end < doc.content.length ? '…' : '');
-          }
+        const titleHit = doc.title && doc.title.toLowerCase().includes(q);
+        const descHit = doc.description && doc.description.toLowerCase().includes(q);
+        const section = bestSection(doc, q);
+
+        // Use section anchor unless the title/description itself matched
+        const useSection = section && !titleHit && !descHit;
+        const url = useSection ? doc.url + '#' + section.id : doc.url;
+        const sectionLabel = useSection ? section.heading : null;
+
+        let snip = '';
+        if (useSection) {
+          snip = snippet(section.body, q, 120);
+        } else if (descHit) {
+          snip = snippet(doc.description, q, 120);
+        } else if (doc.content) {
+          snip = snippet(doc.content, q, 120);
         }
-        return { ...doc, snippet };
+
+        return { title: doc.title, url, categories: doc.categories, section: sectionLabel, snippet: snip };
       });
   }
 
@@ -48,7 +79,9 @@
     } else {
       resultsBox.innerHTML = results.map(r => `
         <a href="${r.url}" class="search-result-item">
-          <div class="result-title">${highlight(r.title, query)}</div>
+          <div class="result-title">
+            ${highlight(r.title, query)}${r.section ? ` <span class="result-section">› ${highlight(r.section, query)}</span>` : ''}
+          </div>
           ${r.categories && r.categories.length ? `<div class="result-category">${r.categories.join(', ')}</div>` : ''}
           ${r.snippet ? `<div class="result-snippet">${highlight(r.snippet, query)}</div>` : ''}
         </a>
