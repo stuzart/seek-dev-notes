@@ -9,8 +9,7 @@ layout: none
     "categories": {{ doc.categories | jsonify }},
     "description": {{ doc.description | jsonify }},
     "url": {{ doc.url | relative_url | jsonify }},
-    "content": {{ doc.content | strip_html | strip_newlines | truncate: 5000 | jsonify }},
-    "sections": [{% assign h2segs = doc.content | split: '<h2' %}{% assign first_sec = true %}{% for seg in h2segs offset: 1 %}{% unless first_sec %},{% endunless %}{% assign sec_id = seg | split: 'id="' | last | split: '"' | first %}{% assign sec_heading = seg | split: '</h2>' | first | split: '>' | last %}{% assign sec_body = seg | split: '</h2>' | last | strip_html | strip_newlines | normalize_whitespace | truncate: 600 %}{"id":{{ sec_id | jsonify }},"heading":{{ sec_heading | jsonify }},"body":{{ sec_body | jsonify }}}{% assign first_sec = false %}{% endfor %}]
+    "sections": [{% assign h2segs = doc.content | split: '<h2' %}{% assign first_sec = true %}{% for seg in h2segs offset: 1 %}{% unless first_sec %},{% endunless %}{% assign sec_id = seg | split: 'id="' | last | split: '"' | first %}{% assign sec_heading = seg | split: '</h2>' | first | split: '>' | last %}{% assign sec_body = seg | split: '</h2>' | last | strip_html | strip_newlines | normalize_whitespace %}{"id":{{ sec_id | jsonify }},"heading":{{ sec_heading | jsonify }},"body":{{ sec_body | jsonify }}}{% assign first_sec = false %}{% endfor %}]
   }{% unless forloop.last %},{% endunless %}
   {% endfor %}
 ]

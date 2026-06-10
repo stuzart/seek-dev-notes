@@ -46,8 +46,11 @@
       .filter(doc =>
         (doc.title && doc.title.toLowerCase().includes(q)) ||
         (doc.description && doc.description.toLowerCase().includes(q)) ||
-        (doc.content && doc.content.toLowerCase().includes(q)) ||
-        (doc.categories && doc.categories.some(c => c.toLowerCase().includes(q)))
+        (doc.categories && doc.categories.some(c => c.toLowerCase().includes(q))) ||
+        (doc.sections && doc.sections.some(s =>
+          (s.heading && s.heading.toLowerCase().includes(q)) ||
+          (s.body && s.body.toLowerCase().includes(q))
+        ))
       )
       .slice(0, 8)
       .map(doc => {
@@ -66,8 +69,9 @@
           snip = snippet(section.body, q, 120);
         } else if (descHit) {
           snip = snippet(doc.description, q, 120);
-        } else if (doc.content) {
-          snip = snippet(doc.content, q, 120);
+        } else {
+          const anySection = (doc.sections || []).find(s => s.body && s.body.toLowerCase().includes(q));
+          snip = anySection ? snippet(anySection.body, q, 120) : (doc.description || '');
         }
 
         return { title: doc.title, url, categories: doc.categories, section: sectionLabel, snippet: snip };
