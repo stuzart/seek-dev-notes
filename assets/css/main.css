@@ -155,6 +155,29 @@ mark { background: #fef08a; color: inherit; border-radius: 2px; }
 
 .nav-home:hover, .nav-home.active { color: var(--accent); text-decoration: none; }
 
+.collapse-all-btn {
+  display: block;
+  width: calc(100% - 2.5rem);
+  margin: 0 1.25rem 0.75rem;
+  padding: 0.3rem 0.5rem;
+  font-size: 0.7rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-muted);
+  background: none;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  cursor: pointer;
+  text-align: center;
+  transition: color 0.1s, border-color 0.1s;
+}
+
+.collapse-all-btn:hover {
+  color: var(--text);
+  border-color: var(--text-muted);
+}
+
 .nav-group {
   border-bottom: 1px solid var(--border);
 }

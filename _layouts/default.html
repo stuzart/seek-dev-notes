@@ -21,7 +21,7 @@
     <nav class="sidebar">
       <a href="{{ '/' | relative_url }}" class="nav-home {% if page.url == '/' %}active{% endif %}">Home</a>
 
-      {% assign preferred_order = "Getting Started,Guide,Reference,Architecture,Configuration,Deployment,Samples,Extended Metadata,Search,Versioning,RDF" | split: "," %}
+      {% assign preferred_order = site.data.categories.order %}
 
       {% assign all_categories = "" | split: "" %}
       {% for doc in site.docs %}
@@ -46,6 +46,8 @@
       {% endfor %}
 
       {% assign sorted_docs = site.docs | sort: "title" %}
+
+      <button class="collapse-all-btn" id="collapse-all-btn" aria-label="Collapse all categories">Collapse all</button>
 
       {% for cat in ordered_categories %}
         {% assign is_open = false %}
@@ -74,6 +76,27 @@
 
   <script>
     const SEARCH_DATA_URL = '{{ "/search.json" | relative_url }}';
+  </script>
+  <script>
+    (function () {
+      const btn = document.getElementById('collapse-all-btn');
+      if (!btn) return;
+      function allCollapsed() {
+        return [...document.querySelectorAll('.nav-group')].every(d => !d.open);
+      }
+      function sync() {
+        btn.textContent = allCollapsed() ? 'Expand all' : 'Collapse all';
+      }
+      btn.addEventListener('click', function () {
+        const collapse = !allCollapsed();
+        document.querySelectorAll('.nav-group').forEach(d => { d.open = !collapse; });
+        sync();
+      });
+      document.querySelectorAll('.nav-group').forEach(d => {
+        d.addEventListener('toggle', sync);
+      });
+      sync();
+    })();
   </script>
   <script src="{{ '/assets/js/search.js' | relative_url }}"></script>
   <script src="{{ '/assets/js/toc.js' | relative_url }}"></script>

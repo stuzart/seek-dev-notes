@@ -14,10 +14,23 @@ title: Documentation
       {% endunless %}
     {% endfor %}
   {% endfor %}
-  {% assign all_categories = all_categories | sort %}
+
+  {% assign ordered_categories = "" | split: "" %}
+  {% for cat in site.data.categories.order %}
+    {% if all_categories contains cat %}
+      {% assign ordered_categories = ordered_categories | push: cat %}
+    {% endif %}
+  {% endfor %}
+  {% assign remaining = all_categories | sort %}
+  {% for cat in remaining %}
+    {% unless ordered_categories contains cat %}
+      {% assign ordered_categories = ordered_categories | push: cat %}
+    {% endunless %}
+  {% endfor %}
+
   {% assign sorted_docs = site.docs | sort: "title" %}
 
-  {% for cat in all_categories %}
+  {% for cat in ordered_categories %}
     <section class="category-section">
       <h2 class="category-heading">{{ cat }}</h2>
       <div class="doc-grid">
