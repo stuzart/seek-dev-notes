@@ -47,7 +47,7 @@ Other key models:
 | `ObservationUnit` | PPEO-aligned experimental unit linking ISA and samples |
 | `Workflow` / `WorkflowClass` | CWL/Snakemake/etc. workflow support, integrates with WorkflowHub |
 
-`app/models/git/` contains the git-versioning models (`Git::Repository`, `Git::Version`, `Git::Blob`, `Git::Annotation`, etc.) — see [Git Versioning Backend](git-backend).
+`app/models/git/` contains the git-versioning models (`Git::Repository`, `Git::Version`, `Git::Blob`, `Git::Annotation`, etc.) — see [Git Versioning Backend](../git-backend/).
 
 ### controllers/
 
@@ -85,7 +85,7 @@ The main domain logic lives here as plain Ruby modules, mixed into models or cal
 | `Seek::ActsAsAsset` | Shared behaviour for all file-backed assets: content blobs, versioning, DOIs, download handling |
 | `Seek::ActsAsIsa` | Shared behaviour for Investigation/Study/Assay: ISA relationships, project association |
 | `Seek::ExplicitVersioning` | Original version-per-record versioning (pre-git) |
-| `Seek::Rdf::RdfGeneration` | Builds and pushes RDF triples — see [RDF Generation](rdf-generation) |
+| `Seek::Rdf::RdfGeneration` | Builds and pushes RDF triples — see [RDF Generation](../rdf-generation/) |
 
 ### Subsystem directories
 

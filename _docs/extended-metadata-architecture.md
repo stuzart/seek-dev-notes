@@ -6,7 +6,7 @@ categories: [Extended Metadata, Architecture]
 
 Extended Metadata lets SEEK administrators attach structured, typed, and validated extra fields to supported resources without schema migrations. The system is built on three core models.
 
-The type registry (`SampleAttributeType`), controlled vocabulary infrastructure (`SampleControlledVocab`), and JSON serialisation layer (`Seek::JSONMetadata`) are shared with the Sample system. For a detailed comparison and the cross-system linking mechanism see [Samples and Sample Types](samples).
+The type registry (`SampleAttributeType`), controlled vocabulary infrastructure (`SampleControlledVocab`), and JSON serialisation layer (`Seek::JSONMetadata`) are shared with the Sample system. For a detailed comparison and the cross-system linking mechanism see [Samples and Sample Types](../samples/).
 
 ## Core models
 

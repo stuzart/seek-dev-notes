@@ -46,7 +46,7 @@ The largest settings page — controls which SEEK services, resource types, and 
 
 | Setting | Default | Description |
 |---|---|---|
-| `solr_enabled` | false | Enables Solr full-text search. Requires a running Solr instance. See [Solr Search Indexing](solr-search-indexing). |
+| `solr_enabled` | false | Enables Solr full-text search. Requires a running Solr instance. See [Solr Search Indexing](../solr-search-indexing/). |
 | `filtering_enabled` | true | Enables faceted filtering on index pages. |
 | `max_filters` | 5 | Maximum number of active filters shown at once. |
 | `pdf_conversion_enabled` | true | Enables server-side PDF conversion of uploaded documents (requires LibreOffice). |
@@ -381,7 +381,7 @@ Exist in `config_setting_attributes.yml` but have no UI field:
 | `type_managers_enabled` | true | Enables designated Type Managers. |
 | `type_managers` | `admins` | Who can manage Sample Types: `admins` or `project_admins`. |
 | `programme_user_creation_enabled` | false | Allows non-admin users to create Programmes (also in features UI but often set here for managed instances). |
-| `reindex_all_batch_size` | 50 | Batch size for `rake seek:reindex_all`. See [Solr Search Indexing](solr-search-indexing). |
+| `reindex_all_batch_size` | 50 | Batch size for `rake seek:reindex_all`. See [Solr Search Indexing](../solr-search-indexing/). |
 | `default_citation_style` | `apa` | Citation style used when rendering publication references. |
 | `cv_dropdown_limit` | 100 | Maximum items shown in controlled vocabulary dropdowns before switching to search. |
 | `max_extractable_spreadsheet_size` | 10 MB | Maximum spreadsheet size for data extraction. |

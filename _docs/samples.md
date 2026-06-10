@@ -89,7 +89,7 @@ Validation rules enforced on the type itself:
 
 A `SampleType` is **locked** while a `SampleMetadataUpdateJob` is in progress over its samples. `locked?` checks `sample_metadata_update_task.in_progress?`. All state-change methods (`state_allows_edit?`, `state_allows_delete?`, etc.) return `false` when locked.
 
-Access control: `can_create?` requires the user to be a logged-in project member and `Seek::Config.samples_enabled` to be true. When `project_admin_sample_type_restriction` is enabled (see [Configuration Settings](configuration-settings)), only project admins can create types.
+Access control: `can_create?` requires the user to be a logged-in project member and `Seek::Config.samples_enabled` to be true. When `project_admin_sample_type_restriction` is enabled (see [Configuration Settings](../configuration-settings/)), only project admins can create types.
 
 ### `Sample` (`app/models/sample.rb`)
 
@@ -127,7 +127,7 @@ One field definition within a SampleType. Includes `Seek::JSONMetadata::Attribut
 
 ### `SampleAttributeType` (`app/models/sample_attribute_type.rb`)
 
-A shared registry of value types. **Used by both `SampleAttribute` and `ExtendedMetadataAttribute`** — there is only one `sample_attribute_types` table. See [Attribute Types](#attribute-types) below, and [Extended Metadata Attribute Types](extended-metadata-attribute-types) for the full reference (the type list is identical for both systems).
+A shared registry of value types. **Used by both `SampleAttribute` and `ExtendedMetadataAttribute`** — there is only one `sample_attribute_types` table. See [Attribute Types](#attribute-types) below, and [Extended Metadata Attribute Types](../extended-metadata-attribute-types/) for the full reference (the type list is identical for both systems).
 
 Key columns: `title`, `base_type` (one of the constants in `lib/seek/samples/base_type.rb`), `regexp` (for string validation), `resolution` (URI resolution pattern), `placeholder` (UI hint).
 
@@ -143,7 +143,7 @@ A shared vocabulary registry — also **used by both `SampleAttribute` and `Exte
 
 The `base_type` of a `SampleAttributeType` determines how values are stored, validated, and rendered. The full list is defined in `lib/seek/samples/base_type.rb` and is shared with the Extended Metadata system.
 
-For the complete reference see [Extended Metadata Attribute Types](extended-metadata-attribute-types) — the type catalogue is identical. The types most specific to the Sample system are:
+For the complete reference see [Extended Metadata Attribute Types](../extended-metadata-attribute-types/) — the type catalogue is identical. The types most specific to the Sample system are:
 
 | Base type | Description |
 |---|---|
@@ -226,7 +226,7 @@ An `ActiveModel::Validator` attached to `Sample` via `validates_with`. For each 
 
 ### `Seek::JSONMetadata::Attribute` (`lib/seek/json_metadata/attribute.rb`)
 
-Included in both `SampleAttribute` and `ExtendedMetadataAttribute`. Provides the shared validation interface. See [Extended Metadata Architecture](extended-metadata-architecture) for the equivalent validation flow in that system.
+Included in both `SampleAttribute` and `ExtendedMetadataAttribute`. Provides the shared validation interface. See [Extended Metadata Architecture](../extended-metadata-architecture/) for the equivalent validation flow in that system.
 
 ---
 
@@ -315,7 +315,7 @@ SampleTypes can be created from ISA templates (`belongs_to :isa_template`). When
 - `create_sample_attributes_from_isa_template` builds `SampleAttribute` records from the template's attribute list
 - Each attribute records its `template_attribute_id` for traceability
 - `input_attribute?` returns `true` for `SeekSampleMulti` attributes tagged as ISA inputs
-- When `isa_json_compliance_enabled` is true (see [Configuration Settings](configuration-settings)), inherited template attributes cannot be changed even if no samples exist
+- When `isa_json_compliance_enabled` is true (see [Configuration Settings](../configuration-settings/)), inherited template attributes cannot be changed even if no samples exist
 
 `is_isa_json_compliant?` on SampleType returns true if all associated studies and assays have ISA JSON compliance enabled.
 
@@ -323,7 +323,7 @@ SampleTypes can be created from ISA templates (`belongs_to :isa_template`). When
 
 ## Search Indexing
 
-When Solr is enabled (see [Solr Search Indexing](solr-search-indexing)):
+When Solr is enabled (see [Solr Search Indexing](../solr-search-indexing/)):
 
 - `Sample` indexes `attribute_values` (all non-blank values from the JSON, flattened) and `sample_type.title`
 - `SampleType` indexes `attribute_search_terms` (all attribute titles)
@@ -363,5 +363,5 @@ A `SampleAttribute` with base type `LinkedExtendedMetadata` or `LinkedExtendedMe
 
 The reverse is not supported: Extended Metadata attributes cannot reference Sample types.
 
-For the full attribute type reference (covering both systems) see [Extended Metadata Attribute Types](extended-metadata-attribute-types).
-For the Extended Metadata data model and validation flow see [Extended Metadata Architecture](extended-metadata-architecture).
+For the full attribute type reference (covering both systems) see [Extended Metadata Attribute Types](../extended-metadata-attribute-types/).
+For the Extended Metadata data model and validation flow see [Extended Metadata Architecture](../extended-metadata-architecture/).
