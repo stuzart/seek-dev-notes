@@ -97,12 +97,17 @@
     node.parentNode.replaceChild(frag, node);
   });
 
-  // Use rAF so scroll runs after layout, with no competing native anchor scroll
-  requestAnimationFrame(() => {
+  // setTimeout(0) lets the browser finish reflowing the inserted <mark> elements
+  // before we measure their position. Manual scrollTo with a fixed header offset
+  // avoids the imprecision of scrollIntoView({ block: 'center' }).
+  const HEADER_OFFSET = 80;
+  setTimeout(() => {
     const first = content.querySelector('mark.search-highlight');
     const target = first || (sectionId && document.getElementById(sectionId));
-    if (target) target.scrollIntoView({ block: 'center', behavior: 'smooth' });
-  });
+    if (!target) return;
+    const y = target.getBoundingClientRect().top + window.scrollY - HEADER_OFFSET;
+    window.scrollTo({ top: Math.max(0, y), behavior: 'smooth' });
+  }, 0);
 
   // Clean params from the URL without a page reload
   history.replaceState(null, '', window.location.pathname);
