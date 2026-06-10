@@ -6,7 +6,7 @@ categories: [Extended Metadata, Reference]
 
 Every `ExtendedMetadataAttribute` has a `sample_attribute_type` that controls what values are accepted, how they are validated, and how they render in the UI.
 
-Attribute types are shared with the Sample system. The base types are defined in `lib/seek/samples/base_type.rb`.
+Attribute types are shared with the Sample system — both `SampleAttribute` and `ExtendedMetadataAttribute` reference the same `sample_attribute_types` table. The base types are defined in `lib/seek/samples/base_type.rb`. For how SampleTypes and Samples use these types see [Samples and Sample Types](samples).
 
 ## Primitive types
 
