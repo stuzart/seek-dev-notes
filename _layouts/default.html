@@ -21,6 +21,8 @@
     <nav class="sidebar">
       <a href="{{ '/' | relative_url }}" class="nav-home {% if page.url == '/' %}active{% endif %}">Home</a>
 
+      {% assign preferred_order = "Getting Started,Guide,Reference,Architecture,Configuration,Deployment,Samples,Extended Metadata,Search,Versioning,RDF" | split: "," %}
+
       {% assign all_categories = "" | split: "" %}
       {% for doc in site.docs %}
         {% for cat in doc.categories %}
@@ -29,18 +31,39 @@
           {% endunless %}
         {% endfor %}
       {% endfor %}
-      {% assign all_categories = all_categories | sort %}
+
+      {% assign ordered_categories = "" | split: "" %}
+      {% for cat in preferred_order %}
+        {% if all_categories contains cat %}
+          {% assign ordered_categories = ordered_categories | push: cat %}
+        {% endif %}
+      {% endfor %}
+      {% assign remaining = all_categories | sort %}
+      {% for cat in remaining %}
+        {% unless ordered_categories contains cat %}
+          {% assign ordered_categories = ordered_categories | push: cat %}
+        {% endunless %}
+      {% endfor %}
+
       {% assign sorted_docs = site.docs | sort: "title" %}
 
-      {% for cat in all_categories %}
-        <div class="nav-category">{{ cat }}</div>
+      {% for cat in ordered_categories %}
+        {% assign is_open = false %}
         {% for doc in sorted_docs %}
-          {% if doc.categories contains cat %}
-            <a href="{{ doc.url | relative_url }}" class="nav-link {% if page.url == doc.url %}active{% endif %}">
-              {{ doc.title }}
-            </a>
+          {% if doc.categories contains cat and doc.url == page.url %}
+            {% assign is_open = true %}
           {% endif %}
         {% endfor %}
+        <details class="nav-group"{% if is_open %} open{% endif %}>
+          <summary class="nav-category">{{ cat }}</summary>
+          {% for doc in sorted_docs %}
+            {% if doc.categories contains cat %}
+              <a href="{{ doc.url | relative_url }}" class="nav-link {% if page.url == doc.url %}active{% endif %}">
+                {{ doc.title }}
+              </a>
+            {% endif %}
+          {% endfor %}
+        </details>
       {% endfor %}
     </nav>
 

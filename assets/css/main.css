@@ -155,13 +155,45 @@ mark { background: #fef08a; color: inherit; border-radius: 2px; }
 
 .nav-home:hover, .nav-home.active { color: var(--accent); text-decoration: none; }
 
+.nav-group {
+  border-bottom: 1px solid var(--border);
+}
+
+.nav-group:last-child {
+  border-bottom: none;
+}
+
 .nav-category {
-  padding: 0.75rem 1.25rem 0.25rem;
+  padding: 0.65rem 1.25rem;
   font-size: 0.7rem;
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.08em;
   color: var(--text-muted);
+  cursor: pointer;
+  list-style: none;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  user-select: none;
+}
+
+.nav-category::-webkit-details-marker { display: none; }
+
+.nav-category::after {
+  content: '›';
+  font-size: 1rem;
+  line-height: 1;
+  transition: transform 0.15s ease;
+  display: inline-block;
+}
+
+.nav-group[open] > .nav-category::after {
+  transform: rotate(90deg);
+}
+
+.nav-category:hover {
+  color: var(--text);
 }
 
 .nav-link {
