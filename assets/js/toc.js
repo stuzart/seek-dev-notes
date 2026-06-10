@@ -52,7 +52,9 @@
 })();
 
 (function () {
-  const q = new URLSearchParams(window.location.search).get('highlight');
+  const params = new URLSearchParams(window.location.search);
+  const q = params.get('highlight');
+  const sectionId = params.get('section');
   if (!q) return;
 
   const content = document.querySelector('.doc-body');
@@ -64,7 +66,7 @@
   const walker = document.createTreeWalker(content, NodeFilter.SHOW_TEXT, {
     acceptNode(node) {
       const tag = node.parentElement && node.parentElement.tagName.toLowerCase();
-      return (tag === 'script' || tag === 'style' || tag === 'pre' || tag === 'code')
+      return (tag === 'script' || tag === 'style')
         ? NodeFilter.FILTER_REJECT
         : NodeFilter.FILTER_ACCEPT;
     }
@@ -95,12 +97,13 @@
     node.parentNode.replaceChild(frag, node);
   });
 
-  // Scroll to first highlight (after browser handles the #anchor)
-  setTimeout(() => {
+  // Use rAF so scroll runs after layout, with no competing native anchor scroll
+  requestAnimationFrame(() => {
     const first = content.querySelector('mark.search-highlight');
-    if (first) first.scrollIntoView({ block: 'center', behavior: 'smooth' });
-  }, 50);
+    const target = first || (sectionId && document.getElementById(sectionId));
+    if (target) target.scrollIntoView({ block: 'center', behavior: 'smooth' });
+  });
 
-  // Clean ?highlight= from the URL without a page reload
-  history.replaceState(null, '', window.location.pathname + window.location.hash);
+  // Clean params from the URL without a page reload
+  history.replaceState(null, '', window.location.pathname);
 })();

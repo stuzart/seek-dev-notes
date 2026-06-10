@@ -57,8 +57,8 @@
 
         // Use section anchor unless the title/description itself matched
         const useSection = section && !titleHit && !descHit;
-        const anchor = useSection ? '#' + section.id : '';
-        const url = doc.url + '?highlight=' + encodeURIComponent(query) + anchor;
+        const url = doc.url + '?highlight=' + encodeURIComponent(query) +
+                    (useSection ? '&section=' + encodeURIComponent(section.id) : '');
         const sectionLabel = useSection ? section.heading : null;
 
         let snip = '';
