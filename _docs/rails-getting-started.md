@@ -1,7 +1,7 @@
 ---
 title: Getting Started with Rails (for SEEK)
 description: Practical orientation to Ruby on Rails for developers new to the SEEK codebase, with tips and links to external resources.
-categories: [Guide]
+categories: [Getting Started]
 ---
 
 SEEK is a Rails 8.1 application running on Ruby 3.3. If you're new to Rails, this page gives a practical orientation tailored to the patterns you'll actually encounter in SEEK, along with pointers to the best external resources.

@@ -1,7 +1,7 @@
 ---
 title: SEEK Project Structure
 description: Directory layout and key subsystems of the SEEK codebase.
-categories: [Reference, Architecture]
+categories: [Getting Started, Reference]
 ---
 
 SEEK is a Rails application. The source lives at `/home/sowen/development/ruby/seek`. This page maps the directory layout to the concepts behind it.

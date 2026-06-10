@@ -1,7 +1,7 @@
 ---
 title: Configuration Settings
 description: How Seek::Config works, what every admin UI setting does, and the settings only accessible via code or environment variables.
-categories: [Architecture, Admin]
+categories: [Configuration, Reference]
 ---
 
 # Configuration Settings

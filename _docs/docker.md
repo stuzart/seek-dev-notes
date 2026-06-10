@@ -1,7 +1,7 @@
 ---
 title: Docker Setup
 description: How SEEK is built and run with Docker, covering the multi-stage Dockerfile, entrypoint scripts, Compose variants, and key configuration files.
-categories: [Infrastructure, Architecture]
+categories: [Deployment, Architecture]
 ---
 
 # Docker Setup

@@ -1,7 +1,7 @@
 ---
 title: Git Versioning Backend
 description: Architecture and internals of SEEK's git-based versioning system for Workflows and other assets.
-categories: [Architecture, Git]
+categories: [Versioning, Architecture]
 ---
 
 # Git Backend Developer Documentation
