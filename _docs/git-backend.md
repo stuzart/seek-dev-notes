@@ -454,6 +454,8 @@ flowchart TD
 
 ## RO-Crate Integration
 
+See [RO-Crate Support](../ro-crate/) for full details on how SEEK generates and consumes Research Object Crates.
+
 When a workflow is imported from a remote git URL (or uploaded as an RO-Crate zip), `GitWorkflowWizard` parses `ro-crate-metadata.json(ld)` to extract:
 - The main workflow file path → stored as `main_workflow` annotation
 - The diagram image path → `diagram` annotation
