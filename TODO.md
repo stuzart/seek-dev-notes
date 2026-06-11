@@ -23,6 +23,9 @@ Topics identified as missing but valuable for SEEK developers.
 
 ## Completed
 
+- [x] **GitHub integration** — URL handling, workflow import from git repos, OAuth login, org scraper
+- [x] **OAuth authentication** — OmniAuth providers (GitHub, ELIXIR AAI, OIDC, LDAP), Identity model, user provisioning, identity linking, configuration
+
 - [x] Rails getting started guide
 - [x] SEEK project structure
 - [x] Solr search indexing
