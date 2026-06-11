@@ -5,9 +5,9 @@ Topics identified as missing but valuable for SEEK developers.
 ## High priority
 
 - [x] **Authorization & Policy system** — `PolicyBasedAuthorization`, `Permission`, `Policy` model; access control underpins almost every controller action
-- [ ] **ISA data model** — Investigation → Study → Assay hierarchy; core scientific structure of SEEK
+- [x] **ISA data model** — Investigation → Study → Assay hierarchy; core scientific structure of SEEK
 - [ ] **acts_as_asset** — the concern that gives assets common behaviour (versioning, tagging, policy, creators, etc.)
-- [ ] **acts_as_isa** — the concern that links assets into the ISA hierarchy (Investigations, Studies, Assays)
+- [x] **acts_as_isa** — the concern that links assets into the ISA hierarchy (Investigations, Studies, Assays)
 
 ## Useful reference
 
