@@ -12,7 +12,7 @@ Topics identified as missing but valuable for SEEK developers.
 
 ## Useful reference
 
-- [ ] **JSON API** — REST API structure, serializers, API token authentication, adding new endpoints
+- [x] **JSON API** — REST API structure, serializers, API token authentication, adding new endpoints
 - [x] **Content Blobs & file storage** — how uploaded files are stored, remote content fetching, `ContentBlob` model lifecycle
 - [x] **Background jobs** — queues, how to add a new job, Delayed::Job setup, named queues
 
