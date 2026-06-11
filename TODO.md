@@ -4,7 +4,7 @@ Topics identified as missing but valuable for SEEK developers.
 
 ## High priority
 
-- [ ] **Authorization & Policy system** — `PolicyBasedAuthorization`, `Permission`, `Policy` model; access control underpins almost every controller action
+- [x] **Authorization & Policy system** — `PolicyBasedAuthorization`, `Permission`, `Policy` model; access control underpins almost every controller action
 - [ ] **ISA data model** — Investigation → Study → Assay hierarchy; core scientific structure of SEEK
 - [ ] **acts_as_asset** — the concern that gives assets common behaviour (versioning, tagging, policy, creators, etc.)
 
