@@ -7,12 +7,13 @@ Topics identified as missing but valuable for SEEK developers.
 - [x] **Authorization & Policy system** — `PolicyBasedAuthorization`, `Permission`, `Policy` model; access control underpins almost every controller action
 - [ ] **ISA data model** — Investigation → Study → Assay hierarchy; core scientific structure of SEEK
 - [ ] **acts_as_asset** — the concern that gives assets common behaviour (versioning, tagging, policy, creators, etc.)
+- [ ] **acts_as_isa** — the concern that links assets into the ISA hierarchy (Investigations, Studies, Assays)
 
 ## Useful reference
 
 - [ ] **JSON API** — REST API structure, serializers, API token authentication, adding new endpoints
 - [x] **Content Blobs & file storage** — how uploaded files are stored, remote content fetching, `ContentBlob` model lifecycle
-- [ ] **Background jobs** — queues, how to add a new job, Delayed::Job setup, named queues
+- [x] **Background jobs** — queues, how to add a new job, Delayed::Job setup, named queues
 
 ## Lower priority
 
