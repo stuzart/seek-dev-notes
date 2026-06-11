@@ -19,7 +19,7 @@ Topics identified as missing but valuable for SEEK developers.
 ## Lower priority
 
 - [x] **BioSchema / Schema.org markup** — how SEEK generates structured metadata for search engines
-- [ ] **Testing setup** — running the test suite, fixtures vs factories, Solr test configuration
+- [x] **Testing setup** — running the test suite, fixtures vs factories, Solr test configuration
 
 ## Completed
 
