@@ -6,7 +6,7 @@ Topics identified as missing but valuable for SEEK developers.
 
 - [ ] **Roles and permissions** — admin, project admin, asset gatekeeper, PAL, programme admin; `Seek::Roles::Scope` and `Seek::Roles::Target`; gatekeeper publish workflow
 - [ ] **DOI minting** — `acts_as_doi_mintable`, `acts_as_doi_parent`, Zenodo/DataCite integration, version-level vs snapshot DOIs, retraction
-- [ ] **Tips, tricks and gotchas** — non-obvious patterns, common pitfalls, and useful console/debug techniques for working in the SEEK codebase
+- [x] **Tips, tricks and gotchas** — non-obvious patterns, common pitfalls, and useful console/debug techniques for working in the SEEK codebase
 
 ## Useful reference
 
