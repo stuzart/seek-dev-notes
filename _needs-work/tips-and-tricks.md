@@ -105,14 +105,6 @@ bundle exec rake seek:repopulate_auth_lookup_tables_sync  # synchronous rebuild
 bundle exec rake seek:repopulate_auth_lookup_tables       # async via background jobs
 ```
 
-### `after_commit` callbacks don't fire in test transactions
-
-SEEK's tests wrap each case in a database transaction that's rolled back at the end. `after_commit` hooks — including RDF generation (`queue_rdf_generation`) and auth lookup updates — **never fire** inside a transaction that's rolled back.
-
-This means:
-- Tests don't generate RDF files on disk by default (expected behaviour).
-- Tests don't update auth lookup tables automatically. Use `disable_authorization_checks { ... }` in setup when creating records that need to be policy-checked later.
-- If you're writing a test that needs auth lookup entries, call `item.update_lookup_table_for_all_users` explicitly after creating it.
 
 ### `FactoryBot.create` bypasses authorization checks
 
