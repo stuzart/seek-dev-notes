@@ -2,6 +2,26 @@
 
 Topics identified as missing but valuable for SEEK developers.
 
+## High priority
+
+- [ ] **Roles and permissions** — admin, project admin, asset gatekeeper, PAL, programme admin; `Seek::Roles::Scope` and `Seek::Roles::Target`; gatekeeper publish workflow
+- [ ] **DOI minting** — `acts_as_doi_mintable`, `acts_as_doi_parent`, Zenodo/DataCite integration, version-level vs snapshot DOIs, retraction
+- [ ] **Tips, tricks and gotchas** — non-obvious patterns, common pitfalls, and useful console/debug techniques for working in the SEEK codebase
+
+## Useful reference
+
+- [ ] **Subscriptions and notifications** — `Subscribable`, the email job chain, project/programme subscription model
+- [ ] **FAIR Data Station import** — turtle upload pipeline, `FairDataStationImportJob`, auto-creating extended metadata types from RDF predicates
+- [ ] **Workflow support** — `Workflow`, `WorkflowClass`, extractor adapters (CWL, Snakemake, Galaxy, Nextflow), Life Monitor integration, GA4GH TRS endpoint
+- [ ] **ObservationUnit** — PPEO-aligned experimental unit, how it bridges ISA and samples
+- [ ] **Content rendering** — `RendererFactory` and the renderer chain (PDF, image, markdown, notebook, YouTube, iframe); adding a new file type
+
+## Lower priority
+
+- [ ] **OpenBIS integration** — external data store bridge
+- [ ] **Annotations and tagging** — `Annotatable`, tag clouds, `RebuildTagCloudsJob`
+- [ ] **Activity logs and stats** — `ActivityLog`, stats subsystem, dashboard stats
+
 ## Completed
 
 - [x] **Authorization & Policy system** — `PolicyBasedAuthorization`, `Permission`, `Policy` model; access control underpins almost every controller action
