@@ -14,10 +14,10 @@ The concepts that matter most in SEEK:
 
 - **MVC** — Models (`app/models/`), Controllers (`app/controllers/`), Views (`app/views/`). In SEEK, most domain logic lives in `lib/seek/` modules that are mixed into models rather than directly in `app/models/`.
 - **ActiveRecord** — Rails' ORM. Models map to database tables; associations (`has_many`, `belongs_to`, `has_one`) define relationships. SEEK makes heavy use of polymorphic associations (e.g. `ContentBlob` attaches to any asset type).
-- **Concerns and modules** — Shared model behaviour is extracted into modules and mixed in with `include`. In SEEK, `acts_as_asset` and `acts_as_isa` are the two key mixins; almost every model includes one of them.
+- **Concerns and modules** — Shared model behaviour is extracted into modules and mixed in with `include`. In SEEK, [`acts_as_asset`](../acts-as-asset/) and [`acts_as_isa`](../acts-as-isa/) are the two key mixins; almost every model includes one of them.
 - **Migrations** — Database schema changes live in `db/migrate/`. Run `bundle exec rake db:migrate` to apply them; the current schema is always in `db/schema.rb`.
 - **Routes** — `config/routes.rb` maps URLs to controller actions. SEEK uses standard `resources :data_files` REST routes for most types.
-- **Background jobs** — Async work uses `delayed_job` via `ActiveJob`. Jobs are in `app/jobs/`. Start workers with `bundle exec rake seek:workers:start`.
+- **Background jobs** — Async work uses `delayed_job` via `ActiveJob`. Jobs are in `app/jobs/`. Start workers with `bundle exec rake seek:workers:start`. See [Background Jobs](../background-jobs/).
 - **Before actions** — Controllers use `before_action` hooks extensively for authentication, authorization, and loading records. The most common SEEK pattern is `before_action :find_and_authorize_requested_item`.
 
 ## Running SEEK locally
@@ -80,17 +80,17 @@ bundle exec rails test test/functional
 bundle exec rails test test/integration
 ```
 
-In controller tests, use `login_as(person)` (from `AuthenticatedTestHelper`) to set the current user. Use `disable_authorization_checks { ... }` in test setup when you want to create records without needing a valid policy.
+In controller tests, use `login_as(person)` (from `AuthenticatedTestHelper`) to set the current user. Use `disable_authorization_checks { ... }` in test setup when you want to create records without needing a valid policy. See [Testing Setup](../testing-setup/) for more patterns.
 
 ## SEEK-specific patterns to know
 
-**`Seek::Config`** — runtime configuration stored in the DB, not in YAML files. Read settings with `Seek::Config.setting_name`. The full list is in `lib/seek/config_setting_attributes.yml`.
+**`Seek::Config`** — runtime configuration stored in the DB, not in YAML files. Read settings with `Seek::Config.setting_name`. See [Configuration Settings](../configuration-settings/) for the full list and how defaults work.
 
 **Feature flags** — each resource type can be toggled on/off. `Seek::Config.data_files_enabled` controls whether DataFile is active. Controllers have a generated `before_action :data_files_enabled?` that returns 404 when disabled.
 
 **`ApplicationRecord` inclusions** — `app/models/application_record.rb` mixes in nearly all cross-cutting concerns automatically (versioning, permissions, tagging, RDF, DOIs, etc.), so every model gets them without explicitly including them.
 
-**Auth lookup table** — permission checks don't evaluate policy records on every request. An `auth_lookup` table is maintained by `AuthLookupUpdateJob` and used for fast queries. This means a policy change is only reflected after the job runs.
+**Auth lookup table** — permission checks don't evaluate policy records on every request. An `auth_lookup` table is maintained by `AuthLookupUpdateJob` and used for fast queries. This means a policy change is only reflected after the job runs. See [Authorization and Policy System](../authorization/).
 
 ## External resources
 

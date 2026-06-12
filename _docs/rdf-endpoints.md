@@ -86,7 +86,7 @@ This allows crawlers and FAIR data tools to discover machine-readable representa
 
 ## SPARQL endpoint
 
-When Virtuoso is configured, SEEK exposes an interactive SPARQL interface at `/sparql`. Queries run against the public named graph.
+When [Virtuoso is configured](../rdf-virtuoso/), SEEK exposes an interactive SPARQL interface at `/sparql`. Queries run against the public named graph.
 
 `app/controllers/sparql_controller.rb`
 

@@ -382,7 +382,7 @@ end
 
 **Policy in responses.** For resources the current user can manage, the response includes a `policy` object with the current access level and any per-project/per-person overrides. See [Authorization and Policy System](../authorization/).
 
-**Extended metadata.** Resources with extended metadata return an `extended_attributes` object with `extended_metadata_type_id` and an `attribute_map` hash. See [Extended Metadata](../extended-metadata/).
+**Extended metadata.** Resources with extended metadata return an `extended_attributes` object with `extended_metadata_type_id` and an `attribute_map` hash. See [Extended Metadata](../extended-metadata-architecture/).
 
 **Timed access codes.** View and download actions accept a `?code=` parameter that grants time-limited access to a resource without authentication. Codes are generated via `asset.generate_auth_code`.
 

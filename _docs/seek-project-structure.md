@@ -29,18 +29,18 @@ The content models are grouped into two broad mixins:
 
 | Mixin | Models |
 |---|---|
-| `acts_as_asset` | `DataFile`, `Document`, `FileTemplate`, `Model`, `Placeholder`, `Presentation`, `Publication`, `Sop`, `Template`, `Workflow`, `Collection` |
-| `acts_as_isa` | `Investigation`, `Study`, `Assay` |
+| [`acts_as_asset`](../acts-as-asset/) | `DataFile`, `Document`, `FileTemplate`, `Model`, `Placeholder`, `Presentation`, `Publication`, `Sop`, `Template`, `Workflow`, `Collection` |
+| [`acts_as_isa`](../acts-as-isa/) | `Investigation`, `Study`, `Assay` |
 
 Other key models:
 
 | Model | Purpose |
 |---|---|
-| `Sample` / `SampleType` / `SampleAttribute` | Structured sample metadata with typed attributes and controlled vocabularies |
-| `ExtendedMetadata` / `ExtendedMetadataType` / `ExtendedMetadataAttribute` | Polymorphic extra metadata attachable to most resource types |
+| `Sample` / `SampleType` / `SampleAttribute` | Structured sample metadata with typed attributes and controlled vocabularies — see [Samples and Sample Types](../samples/) |
+| `ExtendedMetadata` / `ExtendedMetadataType` / `ExtendedMetadataAttribute` | Polymorphic extra metadata attachable to most resource types — see [Extended Metadata Architecture](../extended-metadata-architecture/) |
 | `Project` / `Programme` / `Institution` | Organisational hierarchy |
 | `Person` / `User` | Authentication and identity (separate models — `User` handles login, `Person` holds profile) |
-| `ContentBlob` | Stores file uploads and remote URLs; polymorphically attached to assets |
+| `ContentBlob` | Stores file uploads and remote URLs; polymorphically attached to assets — see [Content Blobs and File Storage](../content-blobs/) |
 | `Snapshot` | Immutable DOI-able point-in-time copy of an asset |
 | `Policy` / `Permission` | Fine-grained access control (see [Permissions](#permissions)) |
 | `Strain` / `Organism` / `HumanDisease` | Biological annotation models |
@@ -82,26 +82,26 @@ The main domain logic lives here as plain Ruby modules, mixed into models or cal
 
 | Module | Purpose |
 |---|---|
-| `Seek::ActsAsAsset` | Shared behaviour for all file-backed assets: content blobs, versioning, DOIs, download handling |
-| `Seek::ActsAsIsa` | Shared behaviour for Investigation/Study/Assay: ISA relationships, project association |
-| `Seek::ExplicitVersioning` | Original version-per-record versioning (pre-git) |
+| `Seek::ActsAsAsset` | Shared behaviour for all file-backed assets: content blobs, versioning, DOIs, download handling — see [acts_as_asset](../acts-as-asset/) |
+| `Seek::ActsAsIsa` | Shared behaviour for Investigation/Study/Assay: ISA relationships, project association — see [acts_as_isa](../acts-as-isa/) |
+| `Seek::ExplicitVersioning` | Original version-per-record versioning (pre-git) — see [Explicit Versioning](../explicit-versioning/) |
 | `Seek::Rdf::RdfGeneration` | Builds and pushes RDF triples — see [RDF Generation](../rdf-generation/) |
 
 ### Subsystem directories
 
 | Directory | What's inside |
 |---|---|
-| `lib/seek/permissions/` | Authorization logic: policy evaluation, auth lookup table management, state-based visibility |
-| `lib/seek/search/` | Sunspot/Solr integration: indexing helpers, common fields |
-| `lib/seek/samples/` | Sample attribute type system: extraction from spreadsheets, attribute handlers, metadata updater |
+| `lib/seek/permissions/` | Authorization logic: policy evaluation, auth lookup table management, state-based visibility — see [Authorization and Policy System](../authorization/) |
+| `lib/seek/search/` | Sunspot/Solr integration: indexing helpers, common fields — see [Solr Search Indexing](../solr-search-indexing/) |
+| `lib/seek/samples/` | Sample attribute type system: extraction from spreadsheets, attribute handlers, metadata updater — see [Samples and Sample Types](../samples/) |
 | `lib/seek/rdf/` | RDF generation, CSV mappings, Virtuoso repository, file storage |
 | `lib/seek/roles/` | Role system: `Seek::Roles::Scope`, `Seek::Roles::Target`, per-project/programme/admin roles |
 | `lib/seek/fair_data_station/` | Turtle import pipeline for FAIR Data Station uploads |
-| `lib/seek/extended_metadata_type/` | JSON upload parsing and validation for Extended Metadata types |
+| `lib/seek/extended_metadata_type/` | JSON upload parsing and validation for Extended Metadata types — see [Extended Metadata Architecture](../extended-metadata-architecture/) |
 | `lib/seek/isa/` | ISA template system and graph helpers |
 | `lib/seek/workflow_extractors/` | Parser adapters for CWL, Snakemake, Galaxy, Nextflow, etc. |
-| `lib/seek/bio_schema/` | Schema.org / Bioschemas metadata generation |
-| `lib/git/` | Git versioning backend: `Git::Repository`, converter, Rugged wrapper |
+| `lib/seek/bio_schema/` | Schema.org / Bioschemas metadata generation — see [BioSchema Markup](../bioschema/) |
+| `lib/git/` | Git versioning backend: `Git::Repository`, converter, Rugged wrapper — see [Git Versioning Backend](../git-backend/) |
 
 ## config/
 
@@ -123,11 +123,11 @@ SEEK uses a two-layer access control system:
 
 2. **Auth lookup table** — `AuthLookup` is a denormalised table updated by `AuthLookupUpdateJob` whenever a policy or membership changes. Controllers query it for fast permission checks rather than evaluating the full policy graph on every request.
 
-`lib/seek/permissions/`
+`lib/seek/permissions/` — see [Authorization and Policy System](../authorization/).
 
 ## Search
 
-Full-text search uses [Sunspot](https://github.com/sunspot/sunspot) against Apache Solr. Models call `searchable { ... }` to declare indexed fields. `ReindexingJob` keeps the index up to date on every save.
+Full-text search uses [Sunspot](https://github.com/sunspot/sunspot) against Apache Solr. Models call `searchable { ... }` to declare indexed fields. `ReindexingJob` keeps the index up to date on every save. See [Solr Search Indexing](../solr-search-indexing/).
 
 Config: `config/sunspot.yml`, `solr/`
 
@@ -146,4 +146,4 @@ Minitest (`test/`) is the primary test suite. RSpec (`spec/`) exists but is very
 | `spec/models/` | Small number of RSpec model specs |
 | `spec/seek/search/` | RSpec search specs |
 
-Run the Minitest suite with `bundle exec rake test`.
+Run the Minitest suite with `bundle exec rake test`. See [Testing Setup](../testing-setup/) for fixtures, factories, search stubs, and CI configuration.
