@@ -1,7 +1,7 @@
 ---
 title: Creating Extended Metadata Types
 description: The three ways to create Extended Metadata Types — seed files, JSON upload, and FAIR Data Station turtle import.
-categories: [Extended Metadata, Guide]
+categories: [Extended Metadata, Guide, Configuration]
 ---
 
 There are three ways to create an `ExtendedMetadataType`. All three ultimately produce the same database records; they differ in who initiates the process and where the definition comes from.

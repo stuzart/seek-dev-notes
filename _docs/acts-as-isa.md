@@ -1,7 +1,7 @@
 ---
 title: acts_as_isa
 description: The concern that gives Investigation, Study, Assay, and ObservationUnit their shared behaviour — authorization, search, subscriptions, RDF, and more.
-categories: [Architecture, Reference]
+categories: [ISA, Architecture, Reference]
 ---
 
 `acts_as_isa` is the class macro that wires up all the shared behaviour for ISA models. It is called in `Investigation`, `Study`, `Assay`, and `ObservationUnit`. For the data structure and relationships between these models, see [ISA Data Model](../isa-data-model/).

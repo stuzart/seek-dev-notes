@@ -1,7 +1,7 @@
 ---
 title: RDF Endpoints & Content Negotiation
 description: How to access RDF from SEEK resources via HTTP, content negotiation, FAIR signposting, and the SPARQL endpoint.
-categories: [RDF, Reference]
+categories: [RDF, API, Reference]
 ---
 
 SEEK exposes RDF for all supported resources via standard HTTP content negotiation. No separate URL is needed — the same resource URL serves HTML, JSON, Turtle, or JSON-LD depending on the `Accept` header.

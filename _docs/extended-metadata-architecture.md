@@ -1,7 +1,7 @@
 ---
 title: Extended Metadata Architecture
 description: Data model, relationships, and internal design of the Extended Metadata system.
-categories: [Extended Metadata, Architecture]
+categories: [Extended Metadata, Architecture, Reference]
 ---
 
 Extended Metadata lets SEEK administrators attach structured, typed, and validated extra fields to supported resources without schema migrations. The system is built on three core models.

@@ -1,7 +1,7 @@
 ---
 title: RO-Crate Support
 description: How SEEK generates and consumes Research Object Crates, with full Workflow RO-Crate profile compliance.
-categories: [Architecture, Reference]
+categories: [Integrations, Architecture, Reference]
 ---
 
 [RO-Crate](https://www.researchobject.org/ro-crate/) (Research Object Crate) is a community specification for packaging research data with structured metadata. SEEK uses it as the primary interchange format for computational workflows, enabling import and export with WorkflowHub and other compatible systems.

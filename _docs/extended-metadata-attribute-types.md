@@ -1,7 +1,7 @@
 ---
 title: Extended Metadata Attribute Types
 description: Reference for all supported attribute data types, their options, and how they are stored.
-categories: [Extended Metadata, Reference]
+categories: [Extended Metadata, Reference, Samples]
 ---
 
 Every `ExtendedMetadataAttribute` has a `sample_attribute_type` that controls what values are accepted, how they are validated, and how they render in the UI.

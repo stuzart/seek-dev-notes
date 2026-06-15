@@ -1,7 +1,7 @@
 ---
 title: JSON API
 description: SEEK's JSON:API-compliant REST API — structure, serializers, authentication, request/response patterns, and how to add new endpoints.
-categories: [Architecture, Reference]
+categories: [API, Architecture, Reference]
 ---
 
 SEEK exposes a [JSON:API](https://jsonapi.org) compliant REST API. All HTML controllers also serve JSON — there is no separate API namespace. The current API version is **0.3**, returned in every response's `meta` object.

@@ -1,7 +1,7 @@
 ---
 title: Content Blobs and File Storage
 description: How SEEK stores, retrieves, and processes uploaded and remotely-referenced files via the ContentBlob model.
-categories: [Architecture, Reference]
+categories: [Assets & Content, Architecture, Reference]
 ---
 
 `ContentBlob` is the central model for file data in SEEK. Every uploaded file, remote URL reference, or in-memory data attachment is represented by a `ContentBlob` record. It handles storage on disk, checksums, MIME type detection, remote fetching, format conversion, and streaming downloads.

@@ -1,7 +1,7 @@
 ---
 title: Solr Search Indexing
 description: How SEEK indexes content into Solr for full-text search, including the indexing pipeline, searchable models, background jobs, and reindex observers.
-categories: [Search, Architecture]
+categories: [Search, Architecture, Reference]
 ---
 
 # Solr Search Indexing

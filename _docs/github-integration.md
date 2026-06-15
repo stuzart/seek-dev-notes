@@ -1,7 +1,7 @@
 ---
 title: GitHub Integration
 description: How SEEK integrates with GitHub — URL handling, workflow import from git repositories, and bulk scraping of organisation workflows.
-categories: [Architecture, Reference]
+categories: [Integrations, Architecture, Reference]
 ---
 
 SEEK has several distinct integration points with GitHub. They are independent of each other and can be used in combination.

@@ -1,7 +1,7 @@
 ---
 title: Samples and Sample Types
 description: How SEEK's sample management system works — SampleType schemas, JSON storage, attribute types, validation, controlled vocabularies, resource linking, and template extraction.
-categories: [Samples, Architecture]
+categories: [Samples, Architecture, Reference]
 ---
 
 # Samples and Sample Types

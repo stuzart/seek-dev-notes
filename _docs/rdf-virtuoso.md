@@ -1,7 +1,7 @@
 ---
 title: Virtuoso Knowledge Graph
 description: Setting up Virtuoso as SEEK's triple store, configuration, named graphs, and building a knowledge graph from SEEK data.
-categories: [RDF, Guide]
+categories: [RDF, Deployment, Guide]
 ---
 
 SEEK can push all generated RDF into an [OpenLink Virtuoso](https://virtuoso.openlinksw.com/) triple store, making the full SEEK knowledge graph available for SPARQL queries and linked data consumption. This is optional — SEEK functions without it, storing RDF as flat files.

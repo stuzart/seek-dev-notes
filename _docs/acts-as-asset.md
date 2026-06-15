@@ -1,7 +1,7 @@
 ---
 title: acts_as_asset
 description: The concern that gives downloadable content models their shared behaviour — versioning, file storage, DOI minting, ISA navigation, search, and publishing.
-categories: [Architecture, Reference]
+categories: [Assets & Content, Architecture, Reference]
 ---
 
 `acts_as_asset` is the class macro for downloadable content models in SEEK. It is called in `DataFile`, `Sop`, `Model`, `Workflow`, `Presentation`, `Document`, `Publication`, `Sample`, `SampleType`, `Placeholder`, `Template`, `FileTemplate`, and `Collection`.

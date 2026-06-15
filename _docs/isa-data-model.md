@@ -1,7 +1,7 @@
 ---
 title: ISA Data Model
 description: The Investigation, Study, and Assay hierarchy that forms the core scientific structure of SEEK.
-categories: [Architecture, Reference]
+categories: [ISA, Architecture, Reference]
 ---
 
 ISA stands for **Investigation, Study, Assay** — a standard for describing biological experiments. SEEK uses this hierarchy as its primary organising structure for research data. Every piece of scientific content in SEEK ultimately sits within this tree.

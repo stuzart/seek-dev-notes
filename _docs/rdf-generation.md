@@ -1,7 +1,7 @@
 ---
 title: RDF Generation
 description: How SEEK builds RDF graphs from model data, the CSV mapping system, vocabularies used, and the async generation pipeline.
-categories: [RDF, Architecture]
+categories: [RDF, Architecture, Reference]
 ---
 
 SEEK generates RDF for all major content types automatically on create/update. The generated triples are stored both as Turtle files on disk and — when Virtuoso is configured — pushed to a triple store for SPARQL querying. See [Virtuoso Knowledge Graph](../rdf-virtuoso/) for setup and configuration.

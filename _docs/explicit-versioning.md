@@ -1,7 +1,7 @@
 ---
 title: Explicit Versioning
 description: How SEEK versions assets using the explicit_versioning framework — version records, ContentBlob snapshots, visibility, and DOI minting.
-categories: [Architecture, Reference, Versioning]
+categories: [Versioning, Assets & Content, Architecture]
 ---
 
 Most downloadable assets in SEEK are versioned — each save that changes content creates a new immutable version record alongside the parent. This is handled by the `explicit_versioning` framework, distinct from the git-based versioning used by `Workflow`. See [Git Versioning Backend](../git-backend/) for the git approach.

@@ -1,7 +1,7 @@
 ---
 title: Working with Extended Metadata in Code
 description: How to define, read, write, and validate Extended Metadata from Ruby code and seed files.
-categories: [Extended Metadata, Guide]
+categories: [Extended Metadata, Guide, Architecture]
 ---
 
 This guide covers the developer-side of Extended Metadata: defining types programmatically, reading and writing values, and adding support to a new resource type.

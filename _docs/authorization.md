@@ -1,7 +1,7 @@
 ---
 title: Authorization and Policy System
 description: How SEEK controls who can view, download, edit, manage, and delete assets using a database-driven policy and permission model.
-categories: [Architecture, Reference]
+categories: [Authorization, Architecture, Reference]
 ---
 
 SEEK uses a layered authorization system built around database-stored policies. Every asset has a `Policy` record that defines default access, plus optional `Permission` records that grant individuals or groups specific rights. Authorization checks cascade through several layers before returning a yes or no.

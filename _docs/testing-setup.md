@@ -1,7 +1,7 @@
 ---
 title: Testing Setup
 description: How to run SEEK's test suite — framework, fixtures, factories, Solr, external service mocking, and CI configuration.
-categories: [Reference]
+categories: [Testing, Reference, Getting Started]
 ---
 
 ## Framework

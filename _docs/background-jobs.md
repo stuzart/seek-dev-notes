@@ -1,7 +1,7 @@
 ---
 title: Background Jobs
 description: SEEK's Delayed::Job-based background processing system — queues, job classes, scheduling, and worker management.
-categories: [Architecture, Reference]
+categories: [Background Jobs, Architecture, Reference]
 ---
 
 SEEK uses [Delayed::Job](https://github.com/collectiveidea/delayed_job) with an ActiveRecord backend. Jobs are stored in the `delayed_jobs` database table and processed by a pool of worker processes, one per named queue. ActiveJob provides the common interface.

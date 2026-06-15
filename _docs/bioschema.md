@@ -1,7 +1,7 @@
 ---
 title: BioSchema and Schema.org Markup
 description: How SEEK generates Schema.org and BioSchemas JSON-LD structured metadata — decorators, HTML embedding, bulk data dumps, and adding markup to new types.
-categories: [Architecture, Reference]
+categories: [BioSchemas, Metadata, Architecture]
 ---
 
 SEEK embeds [Schema.org](https://schema.org) and [BioSchemas](https://bioschemas.org) JSON-LD on every resource page and exposes it as a standalone `.jsonld` endpoint. This makes SEEK resources discoverable by search engines and harvestable by life-science data catalogues.

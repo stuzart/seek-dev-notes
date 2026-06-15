@@ -1,7 +1,7 @@
 ---
 title: OAuth Authentication
 description: How SEEK supports OAuth and OpenID Connect login via OmniAuth — providers, user provisioning, identity linking, and configuration.
-categories: [Architecture, Configuration]
+categories: [Authorization, Configuration, Architecture]
 ---
 
 SEEK supports OAuth and OpenID Connect login via [OmniAuth](https://github.com/omniauth/omniauth) alongside its traditional username/password authentication. Multiple providers can be enabled simultaneously. Users can link more than one OAuth identity to the same SEEK account.
