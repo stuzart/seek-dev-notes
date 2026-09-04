@@ -26,7 +26,22 @@ SEEK's configuration is centralised in `Seek::Config` (`lib/seek/config.rb`). Se
 
 **`CustomAccessors`** — computed helpers that combine multiple stored settings or derive paths. Examples: `asset_filestore_path`, `omniauth_providers` (builds the full OmniAuth provider list from individual `omniauth_*_enabled` flags), `sorting_for(controller)`, `results_per_page_for(controller)`.
 
-Settings are cached per-request in `RequestStore` when `Thread.current[:use_settings_cache]` is set, with a one-week Rails cache backing store for slower-changing values.
+Settings are cached per-request in `RequestStore` when `Thread.current[:use_settings_cache]` is set, backed by a dedicated Redis store (`config.settings_cache_store`, namespace `settings-cache`) with a one-week expiry. The `Rack::SettingsCache` middleware enables the cache for each request and disables it afterwards, so consoles and jobs read live values by default. Because this is a separate store from `Rails.cache`, `rake seek:clear_cache` clears both — see [Caching and Redis](../caching-and-redis/).
+
+**When the database is unavailable, reads fail rather than falling back to defaults.** `settings_table_available?` distinguishes two different "no data" situations:
+
+```ruby
+def settings_table_available?
+  @settings_table_available ||= Settings.table_exists?
+rescue ActiveRecord::NoDatabaseError
+  false
+end
+```
+
+- `table_exists?` returning **false** means the database is reachable but the table does not exist yet — a legitimate bootstrap (during `db:setup`, before the schema is loaded) that continues on defaults.
+- `table_exists?` **raising** means the database itself is unreachable, and the error is now allowed to propagate.
+
+The distinction matters because the admin settings forms are rendered from these values and written straight back. Previously any error was swallowed and the process silently switched to in-memory defaults *for its entire lifetime*, so saved settings were ignored until a restart and the displayed defaults could be persisted over the real ones. A boot that hits an unreachable database now fails and is retried rather than being poisoned. Only `true` is memoized, so reads recover on their own once the database returns.
 
 Encrypted settings (SMTP password, OAuth secrets, LDAP password, DataCite/Zenodo/NeLS/LifeMonitor credentials) are stored via `attr_encrypted` in the `Settings` table's `encrypted_value` column.
 
@@ -79,6 +94,7 @@ The largest settings page — controls which SEEK services, resource types, and 
 |---|---|---|
 | `omniauth_enabled` | false | Master switch for SSO/OmniAuth providers. |
 | `standard_login_enabled` | true | Shows the username/password login form. Can be disabled when using SSO exclusively. |
+| `omniauth_skip_login_page` | false | When exactly one login strategy is available and it redirects to an external provider, send the user straight there instead of rendering the login page. See [OAuth Authentication](../oauth-authentication/). |
 | `omniauth_user_create` | true | Automatically creates a SEEK account on first SSO login. |
 | `omniauth_user_activate` | true | Auto-activates new accounts created via SSO (bypasses email confirmation). |
 | `omniauth_ldap_enabled` | false | Enables LDAP authentication. |
@@ -260,6 +276,7 @@ General, file-handling, policy, and registration settings.
 | `cache_remote_files` | true | Downloads and caches content from remote URLs for preview/search indexing. |
 | `max_cachable_size` | 20 MB | Maximum file size that will be downloaded and cached. |
 | `hard_max_cachable_size` | 100 MB | Absolute upper limit — files larger than this are never cached regardless of other settings. |
+| `cache_max_redis_item_size` | 1 MB | `Rails.cache` entries above this size are written to the filesystem instead of Redis. Set to 0 to store everything on the filesystem. Shown in KB in the admin UI. See [Caching and Redis](../caching-and-redis/). |
 
 #### Sandbox
 
@@ -359,6 +376,7 @@ Any setting can be overridden this way. Common uses:
 - `solr_enabled` — set by the Docker entrypoint
 - `javascript_prepended` / `javascript_appended` — injecting custom JS into every page
 - Ontology paths (`assay_type_ontology_file`, etc.) — pointing at custom ontology files
+- `obfuscate_filters` — makes `FilteringHelper#filter_link` render a `<span>` carrying the URL base64url-encoded in a `data-filter-link` attribute instead of an `<a>`, with JavaScript restoring the link client-side. Discourages crawlers from walking every facet combination. Registered in `config_setting_attributes.yml` but has no admin UI control and no explicit default.
 
 ### Advanced / Rarely-Changed Settings
 
@@ -408,6 +426,8 @@ These configure the runtime environment and are not stored in the database:
 | `SOLR_HOST` / `SOLR_PORT` | Docker entrypoint — `SOLR_PORT` being set triggers `enable_search` which installs the Solr initializer |
 | `RAILS_RELATIVE_URL_ROOT` | Sub-path deployment (e.g. `/seek`) |
 | `MYSQL_HOST` / `MYSQL_DATABASE` / `MYSQL_USER` / `MYSQL_PASSWORD` | Database connection (from `docker/db.env`) |
+| `REDIS_HOST` / `REDIS_PASSWORD` | Redis connection, read by `Seek::RedisConfig` (from `docker/redis.env`) |
+| `REDIS_MAXMEMORY` | `maxmemory` for the `redis_store` container; not read by the application |
 | `NO_ENTRYPOINT_WORKERS` | Skip starting workers in the main container |
 | `QUIET_SUPERCRONIC` | Suppress Supercronic cron log output |
 | `RAILS_LOG_LEVEL` | Log verbosity (`debug`, `info`, `warn`, `error`, `fatal`) |

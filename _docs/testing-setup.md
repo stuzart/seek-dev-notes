@@ -153,6 +153,33 @@ The lambda receives the query string and returns an array of IDs that the search
 
 If you do want to run against a real Solr (e.g. for manual integration testing), the test config uses port **8981** (`config/sunspot.yml`).
 
+## Redis and Caching
+
+Both caches are in-memory during tests, so **no Redis server is needed** for unit or functional tests:
+
+```ruby
+config.cache_store = :memory_store
+config.settings_cache_store = ActiveSupport::Cache::MemoryStore.new
+```
+
+Two exceptions:
+
+**Overflow store unit tests** run against [`mock_redis`](https://github.com/sds/mock_redis) (in the `test` group of the `Gemfile`), so `Seek::Caching::RedisWithFileOverflowStore` can be exercised without a server — see `test/unit/redis_with_file_overflow_store_test.rb`.
+
+**Integration tests** install the real throttle store, because they exercise the full stack and should run against the store the app actually uses rather than a near-copy that could drift from it:
+
+```ruby
+class ActionDispatch::IntegrationTest
+  setup do
+    @rack_attack_memory_store = Rack::Attack.cache.store
+    Rack::Attack.cache.store = Seek::RackAttackStore.build
+  end
+  # teardown restores the memory store
+end
+```
+
+Throttle counters are cleared between these tests so counts do not leak from one test into the next. This is why CI provides a Redis service. See [Caching and Redis](../caching-and-redis/).
+
 ## External HTTP — WebMock and VCR
 
 All outbound HTTP is blocked by WebMock. Requests to localhost are allowed. Any test that exercises code making HTTP calls must either stub the request or use a VCR cassette.
@@ -280,7 +307,9 @@ Three workflows run in CI under `.github/workflows/`.
 
 Runs on every push and pull request against **MySQL 8.4** (default), with one additional SQLite3 run of the unit suite.
 
-**Services:** MySQL 8.4, PostgreSQL 14, Virtuoso 7.2 (RDF store).
+**Services:** MySQL 8.4, PostgreSQL 14, Virtuoso 7.2.15 (RDF store), Redis 8.6 (the `session-store` service).
+
+Redis is provided because the session store needs it regardless of the suite, and because integration tests run against the real `Rack::Attack` throttle store — see below.
 
 **Matrix jobs:**
 

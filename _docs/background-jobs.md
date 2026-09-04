@@ -133,15 +133,22 @@ Periodic jobs are defined in `config/schedule.rb` using the `whenever` gem, whic
 
 | Frequency | Job |
 |---|---|
+| Every minute | `ApplicationStatus.instance.refresh` |
 | Every 10 min | `ApplicationJob.queue_timed_jobs` — OpenBIS cache refresh, project leaving checks |
-| Every 4 hours | `RegularMaintenanceJob` — cleans dangling blobs, expired sessions, stale users |
+| Every 10 min | `script/kill-long-running-soffice.sh` (Docker deployments only) |
+| Every `home_feeds_cache_timeout` min | `NewsFeedRefreshJob` |
+| Every 4 hours | `RegularMaintenanceJob` — dangling and deleted blobs, stale git repositories, unregistered users, activation email resends, failed FAIR Data Station imports |
 | Every 8 hours | `AuthLookupMaintenanceJob` — consistency check on auth lookup tables |
-| Daily (12:10 AM) | BioSchema data dump generation |
-| Daily | `PeriodicSubscriptionEmailJob` for `daily` frequency |
-| Weekly | `PeriodicSubscriptionEmailJob` for `weekly` frequency |
-| Daily (1 AM) | `LifeMonitorStatusJob` — workflow test status check |
+| Daily (offset 2h) | `LifeMonitorStatusJob` — workflow test status check |
+| Daily (offset 3h) | `Galaxy::ToolMap.instance.refresh` |
+| Daily (offset 4h) | `CacheOverflowCleanupJob` — sweeps the filesystem cache and logs Redis memory stats |
+| Daily (12:10 AM) | `Seek::BioSchema::DataDump.generate_dumps` |
+| Daily (12:45 AM) | `rake sitemap:refresh` |
+| Daily / Weekly / Monthly | `PeriodicSubscriptionEmailJob`, one per `PeriodicSubscriptionEmailJob::DELAYS` frequency |
 
-A configurable `Seek::Config.regular_job_offset` (minutes) shifts all periodic jobs to avoid simultaneous spikes.
+A configurable `Seek::Config.regular_job_offset` (minutes) shifts all periodic jobs to avoid simultaneous spikes. The `offset(n)` helper in `config/schedule.rb` computes midnight + `n` hours + that offset.
+
+Sessions are **not** on this list: they live in Redis and expire natively, so the old `db:sessions:batch_trim` task has been removed and `RegularMaintenanceJob` no longer sweeps them. See [Caching and Redis](../caching-and-redis/).
 
 ## Worker Management
 
@@ -226,6 +233,9 @@ See [Authorization and Policy System](../authorization/) for why this table exis
 - Cleans up orphaned git repositories
 - Resends activation emails (up to 3 attempts total)
 - Removes unregistered users after 1 week
+- Cleans up failed FAIR Data Station imports
+
+`CacheOverflowCleanupJob` runs daily and sweeps expired entries from the filesystem side of `Rails.cache`, then logs Redis memory statistics. Redis needs no equivalent sweep — it expires keys natively — so the job exists for the overflow directory, and the stats logging rides along on an already-scheduled slot. See [Caching and Redis](../caching-and-redis/).
 
 ## Running Jobs in Development
 
@@ -337,5 +347,6 @@ Jobs should generally be tested by calling `perform_now` or `new(...).perform` d
 | `app/models/concerns/resource_queue.rb` | Deduplicating queue table concern |
 | `config/initializers/delayed_job_config.rb` | Delayed::Job settings |
 | `config/schedule.rb` | `whenever` cron schedule |
+| `app/jobs/cache_overflow_cleanup_job.rb` | Daily filesystem cache sweep and Redis stats |
 | `lib/seek/workers.rb` | Worker start/stop logic |
 | `lib/tasks/seek_workers.rake` | Worker management rake tasks |

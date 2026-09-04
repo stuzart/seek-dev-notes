@@ -98,7 +98,7 @@ Built-in annotation keys used for Workflows:
 
 ## Module Breakdown
 
-### `Git::Versioning` (`lib/seek/git/versioning.rb` / `lib/git/versioning.rb`)
+### `Git::Versioning` (`lib/git/versioning.rb`)
 
 Class-level DSL. Call `git_versioning(options) { ... }` in a model class to enable git versioning. This:
 - Creates a nested `ModelName::Git::Version` class (e.g. `Workflow::Git::Version`)

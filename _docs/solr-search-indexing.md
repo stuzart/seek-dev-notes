@@ -45,12 +45,19 @@ production:
     port: 8983
 ```
 
-**`solr/seek/conf/schema.xml`** — field type definitions. The primary text field uses:
+**`solr/seek/conf/managed-schema`** — field type definitions. The `text` field type's index-time analyzer chain is:
 - `WhitespaceTokenizer`
-- `ASCIIFoldingFilter` (normalises accented characters)
-- `WordDelimiterGraphFilter` (splits on hyphens, camelCase, etc.)
+- `ASCIIFoldingFilter` (normalises accented characters, `preserveOriginal="true"`)
+- `WordDelimiterGraphFilter` (splits on hyphens, numbers, etc.)
+- `FlattenGraphFilter` (required after a graph filter at index time)
 - `LowerCaseFilter`
-- `EdgeNGramFilter` (prefix matching)
+- `EdgeNGramFilter` (prefix matching, 2–50 characters)
+
+The query-time analyzer is the same minus `FlattenGraphFilter` and `EdgeNGramFilter` — prefixes are generated when indexing, not when querying.
+
+**`solr/seek/conf/solrconfig.xml`** — request handlers and search components, including the spellcheck component described below.
+
+SEEK runs against **Solr 9** (the Docker compose files use `solr:9.10.1`). The bundled configuration was migrated for Solr 9: `LatLonType` is replaced by `LatLonPointSpatialField`, and elements Solr 9 rejects (such as `maxBooleanClauses` in `solrconfig.xml`) have been removed. An existing core carried over from Solr 8 needs its `conf` directory replaced and the index rebuilt.
 
 ---
 
@@ -199,6 +206,65 @@ Key points:
 - Returns an ActiveRecord relation (`where(id: ids)`) so authorization scopes and other query chains apply normally
 
 `SearchController` calls `with_search_query` on each searchable type (or all types for a global search) then filters results through `authorized_for('view')` for the current user.
+
+The query string is sanitised and stripped but its **case is preserved**, so Solr's boolean operators (`AND`, `OR`, `NOT`) work as typed.
+
+---
+
+## Spelling Suggestions ("did you mean")
+
+The search page offers a corrected spelling when Solr thinks the query was misspelled.
+
+The obstacle is that the `*_text` dynamic fields Sunspot writes all full text into are edge n-grammed, so every prefix in them looks like a correctly spelled word — useless as a dictionary. A dedicated field is therefore maintained alongside them:
+
+```xml
+<field name="spellcheck_dictionary" stored="false" type="spell" multiValued="true" indexed="true"/>
+<copyField source="*_text"  dest="spellcheck_dictionary"/>
+<copyField source="*_texts" dest="spellcheck_dictionary"/>
+```
+
+The `spell` field type is deliberately plain — `StandardTokenizer`, `ASCIIFoldingFilter`, `LowerCaseFilter`, and no n-gramming. The name avoids a `_text` suffix so the `*_text` copyField glob doesn't match the field itself and feed it back into itself.
+
+`solrconfig.xml` points the spellcheck component at that field using `DirectSolrSpellChecker`, which reads the live index rather than needing a separately built dictionary:
+
+```xml
+<searchComponent name="spellcheck" class="solr.SpellCheckComponent">
+  <lst name="spellchecker">
+    <str name="name">default</str>
+    <str name="field">spellcheck_dictionary</str>
+    <str name="classname">solr.DirectSolrSpellChecker</str>
+    <int name="minQueryLength">4</int>
+    <float name="accuracy">0.5</float>
+    ...
+  </lst>
+</searchComponent>
+```
+
+`SearchController#spelling_suggestion` runs a **second, `rows=1` query** purely to get the spellcheck response, and offers Solr's collation only when it differs from what the user typed:
+
+```ruby
+def spelling_suggestion(query, sources)
+  search = Sunspot.new_search(*sources) do |s|
+    s.keywords(query)
+    s.spellcheck(q: query, collate: true)
+    s.paginate(page: 1, per_page: 1)
+  end
+  search.execute
+
+  collation = Array(search.solr_spellcheck['collations']).last
+  collation if collation.present? && collation.downcase != query.downcase
+rescue StandardError => e
+  Rails.logger.warn("Unable to fetch spelling suggestions from Solr: #{e.message}")
+  nil
+end
+```
+
+Two deliberate choices:
+
+- **Skipped for JSON requests** — it is a UI nicety, not part of the API.
+- **Any Solr error is logged and swallowed.** A missing or misconfigured spellcheck component must never fail the search itself.
+
+Existing Solr cores need their `conf` updated and a reindex before suggestions appear; `rake seek:upgrade` already reindexes.
 
 ---
 

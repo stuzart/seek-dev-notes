@@ -191,7 +191,8 @@ Unauthenticated requests are subject to GitHub's rate limit (60 requests/hour). 
 ### Relevant files
 
 - `lib/scrapers/github_scraper.rb`
-- `lib/scrapers/github_scraper/workflow_scraper.rb`
+- `lib/scrapers/util.rb` — shared scraper helpers
+- `lib/tasks/scrapers.rake` — the rake tasks that invoke the scrapers
 
 ---
 

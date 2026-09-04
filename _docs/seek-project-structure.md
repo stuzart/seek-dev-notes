@@ -53,9 +53,10 @@ Other key models:
 
 Standard Rails resource controllers. Shared behaviour lives in `app/controllers/concerns/`:
 
-- `Seek::ActsAsAsset::Controller` — download, upload, versioning actions common to all assets
+- `Seek::AssetsCommon` (`lib/seek/assets_common.rb`) — the main asset controller mixin. Pulls in `Seek::AnnotationCommon`, `Seek::ContentBlobCommon`, `Seek::PreviewHandling` and `Seek::AssetsStandardControllerActions`, and adds `find_display_asset`, `update_relationships`, `request_contact`, `typeahead` and friends
 - `FairSignposting` — adds `Link` headers for RDF content negotiation
-- `CommonSweepers` — cache sweeping
+- `RawDisplay` / `RoCrateHandling` — the other concerns under `app/controllers/concerns/`
+- `CommonSweepers` (`app/sweepers/`) — cache sweeping
 
 ### jobs/
 
@@ -83,7 +84,7 @@ The main domain logic lives here as plain Ruby modules, mixed into models or cal
 | Module | Purpose |
 |---|---|
 | `Seek::ActsAsAsset` | Shared behaviour for all file-backed assets: content blobs, versioning, DOIs, download handling — see [acts_as_asset](../acts-as-asset/) |
-| `Seek::ActsAsIsa` | Shared behaviour for Investigation/Study/Assay: ISA relationships, project association — see [acts_as_isa](../acts-as-isa/) |
+| `Seek::ActsAsISA` | Shared behaviour for Investigation/Study/Assay: ISA relationships, project association — see [acts_as_isa](../acts-as-isa/) |
 | `Seek::ExplicitVersioning` | Original version-per-record versioning (pre-git) — see [Explicit Versioning](../explicit-versioning/) |
 | `Seek::Rdf::RdfGeneration` | Builds and pushes RDF triples — see [RDF Generation](../rdf-generation/) |
 
@@ -102,13 +103,16 @@ The main domain logic lives here as plain Ruby modules, mixed into models or cal
 | `lib/seek/workflow_extractors/` | Parser adapters for CWL, Snakemake, Galaxy, Nextflow, etc. |
 | `lib/seek/bio_schema/` | Schema.org / Bioschemas metadata generation — see [BioSchema Markup](../bioschema/) |
 | `lib/git/` | Git versioning backend: `Git::Repository`, converter, Rugged wrapper — see [Git Versioning Backend](../git-backend/) |
+| `lib/seek/caching/` | `RedisWithFileOverflowStore`, the hybrid `Rails.cache` backend — see [Caching and Redis](../caching-and-redis/) |
+| `lib/seek/renderers/` | In-browser preview renderers selected by `RendererFactory` — see [Content Blobs](../content-blobs/) |
 
 ## config/
 
 | File / Directory | Purpose |
 |---|---|
 | `routes.rb` | Standard Rails routes; assets and ISA resources follow REST conventions |
-| `initializers/` | MIME types, Sunspot, Delayed Job, feature flags |
+| `initializers/` | MIME types, Sunspot, Delayed Job, feature flags, `session_store.rb` and `rack_attack.rb` (both Redis-backed) |
+| `environments/` | Per-environment config, including `cache_store` and `settings_cache_store` wiring |
 | `virtuoso_settings.example.yml` | Virtuoso triple store connection — copy to `virtuoso_settings.yml` |
 | `sunspot.yml` | Solr connection settings |
 | `schedule.rb` | Whenever gem cron schedule for maintenance jobs |

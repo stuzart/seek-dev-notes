@@ -64,6 +64,30 @@ The `populate_ro_crate` method builds the crate contents:
 - Remote files referenced by URL are included as external file entities
 - README.md is included from the repository
 
+#### Remote files are described, not bundled
+
+A git version can reference files that live outside the repository. These are added with `add_external_file`, recording the path they *would* occupy inside the crate:
+
+```ruby
+remotes.each do |path, url|
+  crate.add_external_file(url, localPath: path)
+end
+```
+
+The `localPath` matters when the crate is zipped. `ro_crate` materialises the git version into a temporary directory and calls `crate.add_all(tmpdir, ...)`, which would otherwise sweep up the zero-byte placeholder files that remote entities leave behind — producing a zip containing empty files that look like real content. Before `add_all` runs, each external `File` entity with a `localPath` is checked and its placeholder deleted, but **only if it is actually zero bytes**:
+
+```ruby
+crate.entities.each do |entity|
+  next unless !entity.nil? && entity.type == 'File' && entity.external? && !entity['localPath'].nil?
+
+  full_path = File.join(tmpdir, entity['localPath'])
+  File.delete(full_path) if File.zero?(full_path)
+end
+crate.add_all(tmpdir, false, include_hidden: true)
+```
+
+The zero-byte guard is the important part: a remote file that *has* been fetched has real content on disk and must stay in the zip. Only unfetched placeholders are removed. The metadata still describes every remote file by URL either way, so a consumer can retrieve it themselves.
+
 **For content blob workflows:**
 - The uploaded file is added as the main workflow entity
 - A minimal crate is generated around it

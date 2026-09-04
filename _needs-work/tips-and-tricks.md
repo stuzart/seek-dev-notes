@@ -10,7 +10,7 @@ A collection of things that aren't obvious from reading the code, or that catch 
 
 ### Setting the current user
 
-SEEK tracks the current user as a class-level attribute on `User`, not in the request session. In the console or in jobs, `User.current_user` is `nil` by default, which means permission checks run as an anonymous visitor.
+SEEK tracks the current user in thread-local storage (`Thread.current[:current_user]`), not in the request session. In the console or in jobs, `User.current_user` is `nil` by default, which means permission checks run as an anonymous visitor.
 
 To run code as a specific user:
 
@@ -31,7 +31,7 @@ User.current_user = User.find(1)
 
 ### Bypassing authorization checks
 
-`disable_authorization_checks` is available everywhere (it's mixed into `Object`). It sets a global flag that causes all `can_view?` / `can_edit?` etc. calls to return `true`:
+`disable_authorization_checks` is available everywhere (it's mixed into `Object`). It sets a thread-local flag that causes all `can_view?` / `can_edit?` etc. calls to return `true`:
 
 ```ruby
 disable_authorization_checks do
@@ -40,7 +40,7 @@ disable_authorization_checks do
 end
 ```
 
-Useful in console, rake tasks, and seed scripts. Be careful using it in production — the flag is process-global (`$authorization_checks_disabled`), so in a threaded context it affects all threads until the block exits.
+Useful in console, rake tasks, and seed scripts. The flag is thread-local (`Thread.current[:authorization_checks_disabled]`), so it does not affect other threads — but it does affect *everything* the current thread does inside the block, so keep the block as small as possible.
 
 ### Checking permissions
 

@@ -268,9 +268,45 @@ Once samples exist for a type, schema changes that would invalidate existing dat
 | Change an attribute's type | No samples have any value for it |
 | Remove an attribute | No samples have any non-blank value for it |
 | Change an ISA tag | No samples have any value for it |
-| Change a unit | No samples have any value for it |
+| Change a unit | No samples have any value for it (`allow_unit_change?`) |
+| Add a new attribute | `allow_new_attribute?` |
 
-The constraints are checked in `SampleType` validations and in the controller before rendering edit forms. The UI disables the relevant fields rather than allowing a save to fail.
+Note a small asymmetry: the UI gates the unit field on `allow_unit_change?`, but `SampleAttribute#validate_against_editing_constraints` adds its `unit_id_changed?` error under `allow_type_change?` alongside the attribute type, controlled vocabulary and linked sample type.
+
+### Inherited attributes
+
+Attributes reaching a SampleType from a Template behave differently from locally defined ones:
+
+```ruby
+def inherited?(attr)
+  attr&.inherited_from_template_attribute? && is_isa_json_compliant?
+end
+```
+
+An inherited attribute on an ISA JSON compliant type is refused a type or required-flag change outright, regardless of whether samples exist — the template, not the SampleType, owns that decision.
+
+`allow_change_at_creation?` extends this to the moment of creation:
+
+```ruby
+def allow_change_at_creation?(attr)
+  if @sample_type.new_record?
+    !(attr.is_a?(SampleAttribute) && inherited?(attr))
+  else
+    true
+  end
+end
+```
+
+Without it, a brand-new SampleType has no samples, so every other constraint would pass and an inherited attribute could be edited during creation — diverging from its template before the type even exists.
+
+`_sample_attribute_form.html.erb` selects between the two paths for each field:
+
+```erb
+allow_type_change = sample_type.new_record? ? constraints.allow_change_at_creation?(sample_attribute)
+                                            : constraints.allow_type_change?(sample_attribute)
+```
+
+The constraints are checked in `SampleType` validations and when rendering the edit form. Fields the constraints forbid get a `disabled` **CSS class** and `aria-disabled="true"` rather than the HTML `disabled` attribute — so they still appear in the submitted params, and the hidden fields backing them are rendered unconditionally rather than inside the conditional.
 
 ---
 

@@ -77,6 +77,40 @@ Users can see and remove their linked identities at `/users/:id/identities`. A w
 
 Username/password login and OAuth login coexist. The login form shows tabs for enabled providers alongside the standard login tab. If an admin needs emergency access when OAuth is misconfigured, append `?show_standard_login=true` to the login URL to force the password tab to appear regardless of the `standard_login_enabled` setting.
 
+## Login Strategies and Skipping the Login Page
+
+`SessionsHelper` enumerates the available login strategies in order of preference and classifies them by whether they need a form or a redirect:
+
+```ruby
+LOGIN_STRATEGIES = %i[password elixir_aai ldap github oidc].freeze
+
+# strategies with a form to fill in, rather than sending the user out to the provider
+FORM_LOGIN_STRATEGIES = %i[password ldap].freeze
+REDIRECTING_LOGIN_STRATEGIES = (LOGIN_STRATEGIES - FORM_LOGIN_STRATEGIES).freeze
+```
+
+| Helper | Returns |
+|---|---|
+| `available_login_strategies` | The enabled strategies, in `LOGIN_STRATEGIES` order — each gated by its own `show_<strategy>_login?` |
+| `detect_default_login_strategy` | The first available strategy, used to pick the default tab |
+| `sole_redirecting_login_strategy` | The strategy, only when exactly one is available *and* it is a redirecting one |
+| `auto_login_strategy` | The provider to send the user straight to, skipping the login page |
+
+On an instance where SSO is the only way in, rendering a login page with a single button is pure friction. Setting `omniauth_skip_login_page` (default **false**) sends the user straight to the provider:
+
+```ruby
+def auto_login_strategy
+  return unless Seek::Config.omniauth_skip_login_page
+  return if params[:strategy].present? || flash[:error].present?
+
+  sole_redirecting_login_strategy
+end
+```
+
+The two guards matter: without them a **failed** login would bounce straight back to the provider, and an explicit `?strategy=` choice would be overridden. Note also that it only triggers for a *sole* strategy that *redirects* — a form-based sole strategy (password or LDAP) still renders the page, since there is nowhere to send the user.
+
+The setting is off by default, and `?show_standard_login=true` still works as the emergency escape hatch.
+
 ## ELIXIR AAI / LS Login
 
 ELIXIR AAI uses OpenID Connect with SEEK configured as a relying party. The issuer is `https://login.aai.lifescience-ri.eu/oidc/` with OIDC discovery enabled.
@@ -101,6 +135,7 @@ All OAuth settings are managed via `Seek::Config` and can be changed in the admi
 | `omniauth_user_create` | false | Allow new users to be created on first OAuth login |
 | `omniauth_user_activate` | false | Auto-activate new OAuth users without email confirmation |
 | `standard_login_enabled` | true | Show the username/password tab |
+| `omniauth_skip_login_page` | false | Redirect straight to the provider when it is the only login strategy |
 
 ### GitHub
 
@@ -169,3 +204,4 @@ The Norwegian e-Infrastructure for Life Sciences (NeLS) uses a separate OAuth fl
 | `lib/seek/config.rb` | Config accessors for all OAuth settings |
 | `app/views/admin/_omniauth.html.erb` | Admin UI for OAuth settings |
 | `app/views/gadgets/_sign_in.html.erb` | Login form with provider tabs |
+| `app/helpers/sessions_helper.rb` | Login strategy enumeration and auto-login decision |

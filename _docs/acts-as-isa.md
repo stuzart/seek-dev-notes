@@ -228,7 +228,7 @@ If the associated project has a gatekeeper, `publish!` enters an approval workfl
 |---|---|
 | `lib/seek/acts_as_isa.rb` | Entry point — the `acts_as_isa` macro |
 | `lib/seek/acts_as_isa/relationships.rb` | Publication/creator associations and related-item helpers |
-| `lib/seek/acts_as_isa/tag_type.rb` | Tag annotation type definition |
+| `lib/seek/isa/tag_type.rb` | Tag annotation type definition |
 | `lib/seek/acts_as_asset/isa.rb` | Reverse navigation — gives assets `assays`, `studies`, `investigations` |
 | `lib/seek/permissions/policy_based_authorization.rb` | Authorization logic |
 | `lib/seek/search/common_fields.rb` | Shared Solr fields |

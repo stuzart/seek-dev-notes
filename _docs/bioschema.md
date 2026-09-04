@@ -14,7 +14,8 @@ The system lives entirely in `lib/seek/bio_schema/`. It uses a decorator pattern
 resource.to_schema_ld
   └─ Serializer.new(resource)
       └─ Factory → ResourceDecorators::{Type}
-          ├─ schema_type           # Schema.org @type string
+          ├─ schema_type           # Schema.org @type (string or array)
+          ├─ context               # @context hash (@vocab + dct, extended per type)
           ├─ conformance           # BioSchemas profile URL
           ├─ json_representation   # full hash
           └─ schema_mappings DSL   # method → property bindings
@@ -138,19 +139,52 @@ associated_items producer: :projects,
                  member_of: :institutions
 ```
 
+## The JSON-LD `@context`
+
+`@context` is a **JSON object**, not a bare schema.org URL string. `BaseDecorator#context` supplies the baseline:
+
+```ruby
+def context
+  {
+    '@vocab' => Seek::BioSchema::Serializer::SCHEMA_ORG,   # https://schema.org/
+    dct: Seek::BioSchema::Serializer::DCT                  # http://purl.org/dc/terms/
+  }
+end
+```
+
+Using `@vocab` rather than a plain string means individual terms can be mapped to non-schema.org vocabularies alongside it. Decorators extend the context by merging into `super` — the `Workflow` decorator points the BioSchemas-specific terms at `bioschemas.org` so `ComputationalWorkflow` resolves as a BioSchemas type rather than an unrecognised schema.org one:
+
+```ruby
+def context
+  super.merge(
+    input: INPUT_PROPERTY,                    # https://bioschemas.org/terms/input
+    output: OUTPUT_PROPERTY,                  # https://bioschemas.org/terms/output
+    ComputationalWorkflow: WORKFLOW_TYPE,     # https://bioschemas.org/terms/ComputationalWorkflow
+    FormalParameter: FORMALPARAMETER_TYPE     # https://bioschemas.org/terms/FormalParameter
+  )
+end
+```
+
+The serializer also merges `resource_decorator.additional_context` **after** the attributes have been generated, so terms contributed by nested resources are collected during serialization rather than declared up front. `BaseDecorator#additional_contexts(collection)` walks a collection, skips items that are not public, and merges the context of each item's own decorator.
+
 ## BioSchemas Profile Conformance
 
 When a decorator defines `conformance`, the output includes a `dct:conformsTo` entry:
 
 ```json
 {
-  "@context": "https://schema.org",
+  "@context": {
+    "@vocab": "https://schema.org/",
+    "dct": "http://purl.org/dc/terms/"
+  },
   "@type": "Dataset",
   "dct:conformsTo": {
     "@id": "https://bioschemas.org/profiles/Dataset/1.0-RELEASE"
   }
 }
 ```
+
+Nested `FormalParameter` objects on a workflow carry their own `dct:conformsTo` pointing at the FormalParameter profile.
 
 ## HTML Embedding
 
@@ -169,7 +203,7 @@ Output:
 
 ```html
 <script type="application/ld+json">
-{"@context":"https://schema.org","@type":"Dataset","@id":"..."}
+{"@context":{"@vocab":"https://schema.org/","dct":"http://purl.org/dc/terms/"},"@type":"Dataset","@id":"..."}
 </script>
 ```
 

@@ -36,10 +36,40 @@ Accept: application/vnd.api+json
   },
   "meta": {
     "base_url": "https://fairdomhub.org",
-    "api_version": "0.3"
+    "api_version": "0.3",
+    "uuid": "...",
+    "created": "2024-01-01T00:00:00.000Z",
+    "modified": "2024-01-01T00:00:00.000Z",
+    "metrics": {
+      "view_count": 42,
+      "download_count": 7
+    }
   }
 }
 ```
+
+### Activity metrics in `meta`
+
+`ContributedResourceSerializer#_meta` adds a `metrics` object to every contributed resource:
+
+| Field | Included when |
+|---|---|
+| `view_count` | always (the only required field) |
+| `download_count` | the resource `contains_downloadable_items?` |
+| `run_count` | the resource responds to and answers `can_run?` (workflows) |
+
+```ruby
+def _meta
+  meta = super
+  meta[:metrics] ||= {}
+  meta[:metrics][:view_count] = object.view_count
+  meta[:metrics][:run_count] = object.run_count if object.respond_to?(:can_run?) && object.can_run?
+  meta[:metrics][:download_count] = object.download_count if object.respond_to?(:contains_downloadable_items?) && object.contains_downloadable_items?
+  meta
+end
+```
+
+The `metrics` schema is declared in `public/api/definitions/_schemas.yml` with `additionalProperties: false`, so adding a new metric means updating the schema as well as the serializer.
 
 List responses wrap `data` in an array and add `links` for pagination:
 

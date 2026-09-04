@@ -21,19 +21,24 @@ graph TD
     workers["seek_workers\ndocker/start_workers.sh"]
     cron["Supercronic\n(scheduled jobs)"]
     db["MySQL 8.4\nseek-mysql"]
-    solr["Solr 8.11.4\nseek-solr"]
+    solr["Solr 9.10.1\nseek-solr"]
+    redis["Redis 8.6\nseek-redis"]
     virt["Virtuoso 7\nseek-virtuoso\n(optional)"]
 
     nginx -->|proxy| puma
     puma --> db
     puma --> solr
+    puma --> redis
     workers --> db
     workers --> solr
+    workers --> redis
     cron --> db
     seek_container --> virt
 ```
 
-The `seek` container runs nginx + Puma in the same process group. Workers run in a separate `seek_workers` container sharing the same image. Solr and MySQL are independent services.
+The `seek` container runs nginx + Puma in the same process group. Workers run in a separate `seek_workers` container sharing the same image. MySQL, Solr and Redis are independent services.
+
+Redis is **required**, not optional — it backs the Rails cache, the settings cache, user sessions and the `Rack::Attack` throttle counters. See [Caching and Redis](../caching-and-redis/).
 
 ---
 
@@ -171,24 +176,27 @@ Sourced by both `entrypoint.sh` and `start_workers.sh`.
 
 ### `docker-compose.yml` — standard setup
 
-The default configuration. All four services share a base YAML anchor (`seek_base`) for the image name and common environment.
+The default configuration. The application services share a base YAML anchor (`seek_base`) for the image name and common environment.
 
 **Services:**
 
 | Service | Container | Image | Port |
 |---|---|---|---|
 | `db` | `seek-mysql` | `mysql:8.4` | (internal) |
-| `seek` | `seek` | `fairdom/seek:1.18-dev` | `3000:3000` |
-| `seek_workers` | `seek-workers` | `fairdom/seek:1.18-dev` | (none) |
-| `solr` | `seek-solr` | `solr:8.11.4` | (internal) |
+| `redis_store` | `seek-redis` | `redis:8.6-alpine` | (internal) |
+| `seek` | `seek` | `fairdom/seek:main` | `3000:3000` |
+| `seek_workers` | `seek-workers` | `fairdom/seek:main` | (none) |
+| `solr` | `seek-solr` | `solr:9.10.1` | (internal) |
 
 **MySQL** is configured with `utf8mb4` charset and collation. Health check: `mysqladmin ping` every 10 s, starting after 20 s, 90 s graceful shutdown.
 
-**seek** depends on `db` (healthy) and `solr` (healthy). Health check: `curl http://localhost:3000/up`.
+**redis_store** is started with `--appendonly yes`, `--requirepass "$REDIS_PASSWORD"`, and `--maxmemory "$REDIS_MAXMEMORY" --maxmemory-policy allkeys-lru`. Health check: `redis-cli -a "$REDIS_PASSWORD" ping | grep PONG`. Its settings come from `docker/redis.env`, which is also given to `seek` and `seek_workers` so they can build the same connection URL — see [Caching and Redis](../caching-and-redis/).
+
+**seek** depends on `db` (healthy), `solr` (healthy) and `redis_store` (healthy). Health check: `curl http://localhost:3000/up`.
 
 **seek_workers** uses `QUIET_SUPERCRONIC=1` to suppress cron log noise. Health check: `script/check_worker_pids.sh`.
 
-**solr** mounts `./solr/seek/conf` read-only into the container as the Solr configset and uses `solr-precreate seek` to initialise the `seek` core on first start.
+**solr** mounts `./solr/seek/conf` read-only into the container as the Solr configset and uses `solr-precreate seek` to initialise the `seek` core on first start. The configset targets Solr 9 — see [Solr Search Indexing](../solr-search-indexing/).
 
 **External volumes** (must be created before first `docker-compose up`):
 
@@ -197,11 +205,14 @@ docker volume create seek-filestore
 docker volume create seek-mysql-db
 docker volume create seek-solr-data
 docker volume create seek-cache
+docker volume create seek-redis-data
 ```
+
+The image tag `fairdom/seek:main` tracks the development branch. Released deployments should pin a version tag (for example `fairdom/seek:1.19`) rather than following `main`.
 
 ### `docker-compose-virtuoso.yml` — with RDF triple store
 
-Identical to the standard compose but adds a `virtuoso` service (Virtuoso 7.2.15) for RDF/SPARQL support. The `seek` and `seek_workers` services gain `docker/virtuoso.env` as an additional env file.
+Identical to the standard compose but adds a `virtuoso` service (Virtuoso 7.2.15) for RDF/SPARQL support. Like the standard compose, it includes a password-protected `redis_store`; all compose variants are kept consistent on this. The `seek` and `seek_workers` services gain `docker/virtuoso.env` as an additional env file.
 
 `DBA_PASSWORD` in `docker/virtuoso.env` must be changed from the default `CHANGE_ME` before deploying. The same password must be set in `config/virtuoso_settings.yml` (generated from `docker/virtuoso_settings.docker.yml` during the build).
 
@@ -245,6 +256,18 @@ docker compose -f docker-compose.yml -f docker-compose.build.yml up --build
 
 Used at runtime (copied to `config/database.yml` by `use_mysql_db`). Credentials come from `docker/db.env` via environment variables.
 
+### `docker/redis.env` — Redis credentials and memory limit
+
+Read by the `redis_store` service (to set its password and `maxmemory`) and by `seek` / `seek_workers` (to build the same connection URL):
+
+```
+REDIS_PASSWORD=seek_redis_password
+REDIS_HOST=redis_store
+REDIS_MAXMEMORY=256mb
+```
+
+`REDIS_PASSWORD` must be changed from the shipped default before deploying. See [Caching and Redis](../caching-and-redis/) for how these are consumed.
+
 ### `docker/database.docker.sqlite3.yml` — SQLite adapter config
 
 Used during the Docker build only, so `rake db:setup` and `rake assets:precompile` can run without a running MySQL instance. The resulting SQLite file is not used in production.
@@ -274,6 +297,9 @@ An empty file touched during the build (`RUN touch config/using-docker`). Applic
 | `MYSQL_PASSWORD` | — | MySQL password |
 | `SOLR_HOST` | — | Solr hostname |
 | `SOLR_PORT` | — | Enables Solr; if unset, search is disabled |
+| `REDIS_HOST` | `localhost` | Redis hostname (`redis_store` under Compose) |
+| `REDIS_PASSWORD` | — | Redis password; omitted from the URL when unset |
+| `REDIS_MAXMEMORY` | `256mb` | `maxmemory` for the `redis_store` container (not read by the app) |
 | `RAILS_RELATIVE_URL_ROOT` | — | Sub-path prefix (e.g. `/seek`) |
 | `NO_ENTRYPOINT_WORKERS` | — | Set to `1` to skip starting workers in the main container |
 | `QUIET_SUPERCRONIC` | — | Set to `1` to suppress Supercronic log output |

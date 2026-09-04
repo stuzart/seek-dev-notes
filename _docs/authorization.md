@@ -168,6 +168,37 @@ disable_authorization_checks do
 end
 ```
 
+### Thread-local state
+
+Both the current user and the bypass flag are **thread-local**, not process-global:
+
+```ruby
+# app/models/user.rb
+def self.current_user=(user) = Thread.current[:current_user] = user
+def self.current_user       = Thread.current[:current_user]
+
+# lib/extensions/object.rb — mixed into Object
+def disable_authorization_checks
+  saved = Thread.current[:authorization_checks_disabled]
+  Thread.current[:authorization_checks_disabled] = true
+  yield
+ensure
+  Thread.current[:authorization_checks_disabled] = saved
+end
+```
+
+`User.current_user` was previously a `cattr_accessor` and the bypass flag a global `$authorization_checks_disabled`, both of which leaked across threads. Under a threaded server that meant one request could observe another request's current user, or find authorization silently disabled. Neither is now visible outside the thread that set it.
+
+`lib/extensions/object.rb` also provides non-block forms, for the cases where a block does not fit:
+
+| Method | Purpose |
+|---|---|
+| `authorization_checks_disabled?` | Test the flag |
+| `disable_authorization_checks!` | Set it without a block |
+| `enable_authorization_checks!` | Clear it without a block |
+
+Prefer the block form — it restores the previous value in an `ensure`, whereas the bang methods leave the flag set for the rest of the thread's work.
+
 ## FavouriteGroups
 
 `FavouriteGroup` (`app/models/favourite_group.rb`) lets users create named groups of people and grant them bulk permissions. Each user also gets two system-managed groups:

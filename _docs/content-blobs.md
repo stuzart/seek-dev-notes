@@ -269,6 +269,96 @@ renderer = Seek::Renderers::RendererFactory.instance.renderer(blob)
 renderer.render  # returns HTML fragment for embedding in the page
 ```
 
+The factory picks the **first** renderer whose `can_render?` returns true, so the list is ordered most-specific first with `BlankRenderer` as the catch-all. The chosen class is memoized in a small in-process `MemoryStore` keyed on `blob.cache_key`.
+
+### Inline previews on show pages
+
+`AssetsHelper#rendered_asset_view(asset)` embeds the rendered preview in the asset's show page. SOPs, Documents, Data Files and File Templates all use it.
+
+```ruby
+def rendered_asset_view(asset)
+  return '' unless asset.content_blob && asset.can_download?
+
+  our_renderer = Seek::Renderers::RendererFactory.instance.renderer(asset.content_blob)
+  if our_renderer.external_embed? && !cookie_consent.allow_embedding?
+    content = "This embedded content is blocked due to your cookie settings"
+  elsif !our_renderer.external_embed? && !asset.content_blob.file_exists?
+    content = ''            # renderer needs the local file, but it is missing from the filestore
+  else
+    cache_key = "#{asset.cache_key}/#{asset.content_blob.cache_key}/v#{Seek::Renderers::BlobRenderer::CACHE_VERSION}"
+    content = Rails.cache.fetch(cache_key, expires_in: 30.days) { our_renderer.render }
+  end
+  content.blank? ? '' : content_tag(:div, class: 'renderer') { content.html_safe }
+end
+```
+
+Four guards, each for a distinct failure the preview must survive:
+
+- **No blob, or no download permission** — nothing to show.
+- **External embed blocked by cookie consent** — an explanatory message rather than a silent blank.
+- **Local file missing from the filestore** — returns `''` rather than letting the renderer raise. A blob record can outlive its file.
+- **`CACHE_VERSION`** is part of the cache key, so bumping it invalidates every stored fragment when renderer output changes.
+
+Rendered output is cached for **30 days**. Some of these fragments (notebook HTML in particular) are large enough to overflow to the filesystem side of `Rails.cache` — see [Caching and Redis](../caching-and-redis/).
+
+Inline `<pre>` previews are capped at `max-height: 40em` with `overflow: auto` (`div.renderer > pre`) so a large text or CSV file cannot stretch the page indefinitely.
+
+### `TextRenderer` and large or invalid content
+
+`TextRenderer` reads at most `MAX_RENDERABLE_SIZE` (**1 MB**) and appends a truncation notice (`renderers.truncated_content` in `en.yml`) when there is more:
+
+```ruby
+def text_content
+  blob.rewind
+  content = blob.read(MAX_RENDERABLE_SIZE + 1).to_s.dup.force_encoding(Encoding::UTF_8)
+  truncated = content.bytesize > MAX_RENDERABLE_SIZE
+  content = content.encode('UTF-8', invalid: :replace, undef: :replace)
+  if content.bytesize > MAX_RENDERABLE_SIZE
+    # replacing invalid bytes can grow the content, and the limit may fall within a character
+    content = content.byteslice(0, MAX_RENDERABLE_SIZE).scrub('')
+    truncated = true
+  end
+  [content, truncated]
+end
+```
+
+Bytes that are not valid UTF-8 are replaced rather than raising — they would otherwise break string handling and the encoding of the response. Note the second size check: replacing invalid bytes can *grow* the content past the limit, and a byte-slice can land mid-character, hence the `scrub('')`. The same truncation applies to `render_standalone`, as a trailing plain-text note.
+
+`SlideshareRenderer` returns an empty string rather than raising when the Slideshare API response cannot be parsed, so a third-party outage degrades to no preview rather than a 500.
+
+The git blob view (`app/views/git/_blob.html.erb`) adds one more case: when a blob is `remote?` but not yet `fetched?` it shows "This file is held externally" instead of attempting to render content that is not there.
+
+### Markdown and relative image links
+
+`Seek::Markdown` (`lib/seek/markdown.rb`) renders markdown through an `HTMLPipeline` with two node filters:
+
+- **`LinkNofollowFilter`** — adds `rel="nofollow"` to every `<a>`, preserving any existing `rel` values.
+- **`RelativeLinkFilter`** — rewrites relative `<img src>` values against a `relative_root` passed in the pipeline context.
+
+The second filter exists so that a README rendered as a git-versioned asset's description can show images committed alongside it. `app/views/workflows/show.html.erb` supplies the root as the workflow version's `git_raw` path, threaded through `render_markdown(markdown, relative_root:)` and `_item_description.html.erb`:
+
+```ruby
+def handle_element(img)
+  return if img['src'].nil? || context[:relative_root].nil?
+
+  src = img['src'].strip
+  src_uri = Addressable::URI.parse(src)
+  return if src_uri.absolute?
+
+  src = src[1..] if src.start_with?('/')
+  new_src = Addressable::URI.join(context[:relative_root], src).to_s
+
+  # This stops anyone from attempting to show something from another record
+  return unless new_src.include? context[:relative_root]
+
+  img['src'] = new_src
+end
+```
+
+Three things it deliberately does *not* do: absolute URLs are left alone, a missing `relative_root` is a no-op (so the filter is safe on markdown from anywhere), and the joined result must still contain the root — otherwise a `../`-laden path could escape into another record's files.
+
+`Seek::Markdown.render` and `strip_markdown` both re-encode their input with `invalid: :replace, undef: :replace` first, so invalid byte sequences degrade instead of raising.
+
 ## External Integrations
 
 ### NeLS
