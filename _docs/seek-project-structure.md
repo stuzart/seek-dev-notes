@@ -60,7 +60,7 @@ Standard Rails resource controllers. Shared behaviour lives in `app/controllers/
 
 ### jobs/
 
-Delayed Job background jobs. Notable ones:
+ActiveJob background jobs, run by Solid Queue. Notable ones:
 
 | Job | Trigger |
 |---|---|
@@ -69,7 +69,7 @@ Delayed Job background jobs. Notable ones:
 | `SampleDataExtractionJob` | After a spreadsheet upload |
 | `FairDataStationImportJob` | After a turtle upload |
 | `RemoteGitFetchJob` | Scheduled / manual git repository sync |
-| `RegularMaintenanceJob` | Cron-style housekeeping |
+| `RegularMaintenanceJob` | Recurring housekeeping (every 4 hours, `config/recurring.yml`) |
 
 ### serializers/
 
@@ -111,11 +111,12 @@ The main domain logic lives here as plain Ruby modules, mixed into models or cal
 | File / Directory | Purpose |
 |---|---|
 | `routes.rb` | Standard Rails routes; assets and ISA resources follow REST conventions |
-| `initializers/` | MIME types, Sunspot, Delayed Job, feature flags, `session_store.rb` and `rack_attack.rb` (both Redis-backed) |
+| `initializers/` | MIME types, Sunspot, Solid Queue and Mission Control, feature flags, `session_store.rb` and `rack_attack.rb` (both Redis-backed) |
 | `environments/` | Per-environment config, including `cache_store` and `settings_cache_store` wiring |
 | `virtuoso_settings.example.yml` | Virtuoso triple store connection — copy to `virtuoso_settings.yml` |
 | `sunspot.yml` | Solr connection settings |
-| `schedule.rb` | Whenever gem cron schedule for maintenance jobs |
+| `queue.yml` | Solid Queue worker topology — one worker per enabled queue |
+| `recurring.yml` | Solid Queue recurring (cron) schedule for maintenance and periodic jobs |
 | `ontologies/` | JERM and other ontology RDF files |
 | `default_data/` | Seed YAML files for controlled vocab, sample attribute types, etc. |
 

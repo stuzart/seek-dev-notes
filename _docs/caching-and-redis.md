@@ -115,7 +115,7 @@ To avoid shipping the whole namespace to the client for filtering, `redis_scan_p
 
 ## `CacheOverflowCleanupJob`
 
-Runs daily (`RUN_PERIOD = 1.day`, scheduled at `offset(4)` in `config/schedule.rb`) and does two things:
+Runs daily at 04:00 UTC (the `cache_overflow_cleanup` entry in `config/recurring.yml`) and does two things:
 
 ```ruby
 def perform
@@ -206,7 +206,7 @@ SEEK::Application.config.session_store(:redis_store,
 )
 ```
 
-Redis expires session keys itself, so the old `db:sessions:batch_trim` scheduled task has been removed from `config/schedule.rb` and `RegularMaintenanceJob` no longer sweeps sessions.
+Redis expires session keys itself, so the old `db:sessions:batch_trim` scheduled task has been removed and `RegularMaintenanceJob` no longer sweeps sessions. (`config/schedule.rb` is now empty; periodic jobs are scheduled in Solid Queue's `config/recurring.yml`.)
 
 ---
 

@@ -122,7 +122,9 @@ Policy checks are expensive when applied to large lists (index pages, search res
 user_id | asset_id | can_view | can_download | can_edit | can_manage | can_delete
 ```
 
-One row per (user, asset) pair. The table is rebuilt asynchronously after any policy or permission change via `AuthLookupUpdateJob`. The `can_*?` methods read from this table when it is available and consistent, falling back to live computation otherwise.
+One row per (user, asset) pair. The table is rebuilt asynchronously after any policy or permission change via `AuthLookupUpdateJob`.
+
+The trigger is `Policy`'s `after_commit` callbacks, `queue_update_auth_table` and `queue_rdf_generation_job`. Both return early when nothing but `updated_at` changed, and otherwise call `Policy#assets` once each. `Policy#assets` queries **every** authorized type's table by `policy_id`, so it is relatively expensive — `policy_id` is indexed on all asset and version tables since #2747 (previously 26 of the 31 tables did a full scan). Avoid calling it in loops. The `can_*?` methods read from this table when it is available and consistent, falling back to live computation otherwise.
 
 ## Controller Enforcement
 
@@ -188,6 +190,8 @@ end
 ```
 
 `User.current_user` was previously a `cattr_accessor` and the bypass flag a global `$authorization_checks_disabled`, both of which leaked across threads. Under a threaded server that meant one request could observe another request's current user, or find authorization silently disabled. Neither is now visible outside the thread that set it.
+
+The Solid Queue workers still run a single thread per queue (`config/queue.yml`) — a cautious default set during the job backend migration, whose comment still refers to these values as globals. Raising the thread count is now possible in principle, but test it; see [Background Jobs](../background-jobs/#worker-topology-configqueueyml).
 
 `lib/extensions/object.rb` also provides non-block forms, for the cases where a block does not fit:
 

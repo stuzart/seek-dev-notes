@@ -2,7 +2,7 @@
 
 Topics identified as missing but valuable for SEEK developers.
 
-Last reviewed against seek `main` on 2026-09-04 (SEEK 1.19.0-main).
+Last reviewed against seek `main` on 2026-10-06 (SEEK 1.19.0-main).
 
 ## High priority
 
@@ -12,7 +12,6 @@ Last reviewed against seek `main` on 2026-09-04 (SEEK 1.19.0-main).
 
 ## Useful reference
 
-- [ ] **Solid Queue migration** — `main` still uses Delayed::Job, but the `solid-queue-2656` branch replaces it. When that merges, [Background Jobs](_docs/background-jobs.md) needs a substantial rewrite: queue adapter, worker management rake tasks, the runner pidfile, and the admin "restart workers" flow all change.
 - [ ] **Subscriptions and notifications** — `Subscribable`, the email job chain, project/programme subscription model
 - [ ] **FAIR Data Station import** — turtle upload pipeline, `FairDataStationImportJob`, auto-creating extended metadata types from RDF predicates
 - [ ] **Workflow support** — `Workflow`, `WorkflowClass`, extractor adapters (CWL, Snakemake, Galaxy, Nextflow), Life Monitor integration, GA4GH TRS endpoint
@@ -31,6 +30,7 @@ Last reviewed against seek `main` on 2026-09-04 (SEEK 1.19.0-main).
 
 ## Completed
 
+- [x] **Solid Queue migration** — [Background Jobs](_docs/background-jobs.md) rewritten for Solid Queue: `queue.yml` topology, `recurring.yml` schedule (replacing `whenever`), supervisor and `seek:workers:*` tasks, Mission Control dashboard at `/jobs`, failure semantics, and the Delayed::Job upgrade path (#2656, #2739)
 - [x] **Caching and Redis** — `Seek::RedisConfig`, the `RedisWithFileOverflowStore` hybrid cache, settings cache, Redis sessions, `Rack::Attack` throttle store, `CacheOverflowCleanupJob`, monitoring
 - [x] **Authorization & Policy system** — `PolicyBasedAuthorization`, `Permission`, `Policy` model; access control underpins almost every controller action
 - [x] **ISA data model** — Investigation → Study → Assay hierarchy; core scientific structure of SEEK

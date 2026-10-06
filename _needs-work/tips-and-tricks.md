@@ -77,17 +77,19 @@ df.find_version(2).content_blob
 
 ### Inspecting failed background jobs
 
+`ApplicationJob` reports and swallows exceptions, so most failing SEEK jobs *finish* as far as Solid Queue is concerned — check the log first. Jobs that do fail (mailer deliveries, recurring `command:` entries, exhausted `retry_on`, crashed workers) can be inspected in the Mission Control dashboard at `/jobs`, or in the console:
+
 ```ruby
-Delayed::Job.where.not(failed_at: nil).last.last_error   # most recent failure
-Delayed::Job.where.not(failed_at: nil).count             # number of failures
-Delayed::Job.where.not(locked_at: nil).count             # currently running
+SolidQueue::FailedExecution.last.error          # exception_class, message, backtrace
+SolidQueue::Job.failed.count                     # number of failures
+SolidQueue::ClaimedExecution.count               # currently running
+SolidQueue::Job.where(finished_at: nil).group(:queue_name).count  # backlog per queue
 ```
 
-To re-queue a failed job, set `failed_at` and `run_at` back to nil:
+To re-queue a failed job:
 
 ```ruby
-job = Delayed::Job.where.not(failed_at: nil).last
-job.update_columns(failed_at: nil, run_at: Time.now, attempts: 0)
+SolidQueue::Job.failed.last.retry
 ```
 
 ---
@@ -162,7 +164,8 @@ This catches people out most often when switching between branches that have dif
 | `seek:repopulate_auth_lookup_tables_sync` | Rebuilds auth lookup tables synchronously (slow on large instances) |
 | `seek:reindex_all` | Queues background jobs to reindex all models in Solr |
 | `seek:clear_filestore_tmp` | Removes temp files from `filestore/tmp/` |
-| `jobs:workoff` | Runs all queued jobs immediately in the foreground — useful in development to avoid running a separate worker process |
+| `jobs:workoff` | Runs all ready jobs in the foreground, then exits — useful in development to avoid running a separate worker process (`QUEUES=a,b` to restrict) |
+| `jobs:check` | Exits non-zero if any job has been due for longer than 300s (or the given argument) |
 
 Run with `bundle exec rake <task>`. To see all available tasks with descriptions, run `bundle exec rake -T` (add a grep to filter: `bundle exec rake -T seek`).
 

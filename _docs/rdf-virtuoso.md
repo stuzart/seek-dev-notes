@@ -141,10 +141,10 @@ bundle exec rake seek_rdf:generate
 
 This enqueues every RDF-capable resource. The `RdfGenerationJob` workers process them in batches of 10. Monitor progress via the job queue or Virtuoso's admin interface at `http://localhost:8890/conductor`.
 
-For large instances, run multiple Delayed Job workers to speed up the bulk load:
+`RdfGenerationJob` runs on the `default` queue, which has a single one-thread worker. For large instances you can drain it faster by running extra workers alongside the supervisor — Solid Queue claims jobs with `SKIP LOCKED`, so they won't run the same job twice:
 
 ```bash
-bundle exec rake jobs:work
+bundle exec rake jobs:workoff QUEUES=default
 ```
 
 ### Keeping the graph in sync
@@ -255,9 +255,9 @@ WHERE  { GRAPH <seek:private> { <resource-uri> ?p ?o } }
 ## Troubleshooting
 
 **Triples not appearing after save**
-- Check `RdfGenerationQueue` and Delayed Job workers are running
+- Check `RdfGenerationQueue` and the Solid Queue workers are running (`rake seek:workers:status`, or the admin page)
 - Check `repo.available?` returns `true`
-- Look for errors in the job queue: `Delayed::Job.where('failed_at IS NOT NULL').last.last_error`
+- Look for errors in the log — `ApplicationJob` reports and swallows exceptions, so failures rarely show in the Mission Control dashboard (`/jobs`)
 
 **Authentication errors**
 - Virtuoso uses digest auth on the SPARQL update endpoint — confirm `username`/`password` are correct

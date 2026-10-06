@@ -236,13 +236,13 @@ format.jsonld { render body: @data_file.to_schema_ld }
 
 ## Bulk Data Dumps
 
-`Seek::BioSchema::DataDump` generates per-type JSONLD dump files containing all public records. These are regenerated nightly via the `whenever` schedule:
+`Seek::BioSchema::DataDump` generates per-type JSONLD dump files containing all public records. These are regenerated nightly by a Solid Queue recurring task:
 
-```ruby
-# config/schedule.rb
-every 1.day, at: '12:10 am' do
-  runner "Seek::BioSchema::DataDump.generate_dumps"
-end
+```yaml
+# config/recurring.yml
+bioschema_data_dump_generate:
+  command: "Seek::BioSchema::DataDump.generate_dumps"
+  schedule: "10 0 * * *"   # 00:10 UTC
 ```
 
 Each dump is stored in the filestore as `{resource_type}-bioschemas-dump.jsonld` and exposed as a `DataDownload` within the `DataCatalog` markup on the home page, allowing harvesters to retrieve all records in one request.
@@ -327,4 +327,4 @@ puts json['name']     # title
 | `app/helpers/rdf_helper.rb` | `schema_ld_script_block` |
 | `app/views/layouts/application.html.erb` | JSON-LD injection point in `<head>` |
 | `config/initializers/mime_types.rb` | `.jsonld` MIME type registration |
-| `config/schedule.rb` | Nightly data dump schedule |
+| `config/recurring.yml` | Nightly data dump schedule |

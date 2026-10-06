@@ -18,8 +18,8 @@ All Docker-related files live in `docker/`, with the `Dockerfile` and `docker-co
 graph TD
     nginx["nginx (port 3000)"]
     puma["Puma (port 2000, internal)"]
-    workers["seek_workers\ndocker/start_workers.sh"]
-    cron["Supercronic\n(scheduled jobs)"]
+    workers["seek_workers\ndocker/start_workers.sh\n(Solid Queue)"]
+    cron["Supercronic\n(soffice reaping)"]
     db["MySQL 8.4\nseek-mysql"]
     solr["Solr 9.10.1\nseek-solr"]
     redis["Redis 8.6\nseek-redis"]
@@ -115,7 +115,7 @@ flowchart TD
     F --> G[rake sitemap:create &]
     G --> H[bundle exec puma -C docker/puma.rb &]
     H --> I{NO_ENTRYPOINT_WORKERS?}
-    I -->|not set| J[rake seek:workers:start &]
+    I -->|not set| J[rake seek:workers:start]
     J --> K[setup_and_start_cron]
     I -->|set| L[Skip workers and cron]
     K --> M[tail -f log/production.log &]
@@ -125,7 +125,7 @@ flowchart TD
 
 ### `NO_ENTRYPOINT_WORKERS`
 
-Set to `1` in `docker-compose.yml` for the `seek` container. This prevents the main container from starting delayed job workers, leaving that to the dedicated `seek_workers` container. Unset it only when running a single all-in-one container without `docker-compose`.
+Set to `1` in `docker-compose.yml` for the `seek` container. This prevents the main container from starting the Solid Queue supervisor (and Supercronic), leaving that to the dedicated `seek_workers` container. Unset it only when running a single all-in-one container without `docker-compose`.
 
 ### nginx config generation
 
@@ -149,7 +149,10 @@ Runs in the `seek_workers` container. Mirrors the entrypoint but skips nginx and
 3. Waits for the `users` table to exist (`wait_for_database`) — ensures the `seek` container has finished `db:setup` first
 4. Calls `start_search`
 5. Calls `setup_and_start_cron`
-6. Runs `bundle exec rake seek:workers:start` (blocking)
+6. Runs `bundle exec rake seek:workers:start`, which daemonises the Solid Queue supervisor (`bin/jobs`) and returns
+7. Tails `log/production.log` to keep the container in the foreground — the supervisor writes to the Rails log
+
+The supervisor forks a worker per enabled queue plus a dispatcher and the recurring-job scheduler — see [Background Jobs](../background-jobs/). Because the recurring schedule runs inside Solid Queue, only the container running the workers runs scheduled jobs; there is no risk of two containers firing the same cron entry.
 
 ---
 
@@ -166,7 +169,9 @@ Sourced by both `entrypoint.sh` and `start_workers.sh`.
 | `check_mysql` | Runs `use_mysql_db`, `wait_for_mysql`, and `rake db:setup` if the DB is empty |
 | `enable_search` | Copies `docker/seek_local_search_enabled.rb` to `config/initializers/` |
 | `start_search` | Calls `enable_search` if `SOLR_PORT` is set; logs a warning otherwise |
-| `setup_and_start_cron` | Generates `/seek/seek.crontab` via `whenever`, then starts Supercronic |
+| `setup_and_start_cron` | Starts Supercronic on the static `docker/seek.crontab` |
+
+`docker/seek.crontab` now contains a single entry — `script/kill-long-running-soffice.sh` every 10 minutes, reaping LibreOffice processes left over from document conversion. It used to be generated at startup by `whenever` from `config/schedule.rb`; all application scheduling has moved to Solid Queue's `config/recurring.yml`.
 
 `start_search` is opt-in: if `SOLR_PORT` is not set (single-container mode without a Solr service), Solr stays disabled and no initializer is written.
 
@@ -194,7 +199,7 @@ The default configuration. The application services share a base YAML anchor (`s
 
 **seek** depends on `db` (healthy), `solr` (healthy) and `redis_store` (healthy). Health check: `curl http://localhost:3000/up`.
 
-**seek_workers** uses `QUIET_SUPERCRONIC=1` to suppress cron log noise. Health check: `script/check_worker_pids.sh`.
+**seek_workers** uses `QUIET_SUPERCRONIC=1` to suppress cron log noise. Health check: `script/check_worker_pids.sh`, which checks that the Solid Queue supervisor pid in `tmp/pids/solid_queue_supervisor.pid` is alive.
 
 **solr** mounts `./solr/seek/conf` read-only into the container as the Solr configset and uses `solr-precreate seek` to initialise the `seek` core on first start. The configset targets Solr 9 — see [Solr Search Indexing](../solr-search-indexing/).
 

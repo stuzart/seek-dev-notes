@@ -8,7 +8,7 @@ categories: [Search, Architecture, Reference]
 
 SEEK uses [Apache Solr](https://solr.apache.org/) via the [Sunspot](https://github.com/sunspot/sunspot) gem for full-text search. Indexing is asynchronous — changes are queued in the database and processed by a background job rather than written to Solr inline.
 
-Solr can be disabled via `Seek::Config.solr_enabled`. When disabled, all `searchable` blocks are skipped at class load time and search queries fall back to returning all records.
+Solr can be disabled via `Seek::Config.solr_enabled`. When disabled, all `searchable` blocks are skipped at class load time and search queries fall back to returning all records. Removal on destroy is guarded too: `ApplicationRecord#remove_from_index` overrides Sunspot's version to call `solr_remove_from_index` only when the class is searchable **and** `solr_enabled` is true — before #2736, destroying a record on an instance with Solr disabled tried to contact Solr.
 
 ---
 

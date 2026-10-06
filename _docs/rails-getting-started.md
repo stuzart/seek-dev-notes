@@ -17,7 +17,7 @@ The concepts that matter most in SEEK:
 - **Concerns and modules** — Shared model behaviour is extracted into modules and mixed in with `include`. In SEEK, [`acts_as_asset`](../acts-as-asset/) and [`acts_as_isa`](../acts-as-isa/) are the two key mixins; almost every model includes one of them.
 - **Migrations** — Database schema changes live in `db/migrate/`. Run `bundle exec rake db:migrate` to apply them; the current schema is always in `db/schema.rb`.
 - **Routes** — `config/routes.rb` maps URLs to controller actions. SEEK uses standard `resources :data_files` REST routes for most types.
-- **Background jobs** — Async work uses `delayed_job` via `ActiveJob`. Jobs are in `app/jobs/`. Start workers with `bundle exec rake seek:workers:start`. See [Background Jobs](../background-jobs/).
+- **Background jobs** — Async work uses [Solid Queue](https://github.com/rails/solid_queue) via `ActiveJob`. Jobs are in `app/jobs/`. Run workers in the foreground with `bin/jobs`, or in the background with `bundle exec rake seek:workers:start`. See [Background Jobs](../background-jobs/).
 - **Before actions** — Controllers use `before_action` hooks extensively for authentication, authorization, and loading records. The most common SEEK pattern is `before_action :find_and_authorize_requested_item`.
 
 ## Running SEEK locally
@@ -31,7 +31,8 @@ bundle exec rake db:setup          # creates DB and seeds default data
 bundle exec rails server           # http://localhost:3000
 
 # Start background workers (required for file uploads, emails, RDF)
-bundle exec rake seek:workers:start
+bin/jobs                           # foreground, logs to the terminal
+bundle exec rake seek:workers:start # or daemonised in the background
 
 # In development, run all queued jobs immediately rather than waiting for workers
 bundle exec rake jobs:workoff
@@ -116,5 +117,5 @@ If you're new to Ruby as well as Rails, [Ruby in Twenty Minutes](https://www.rub
 - [FactoryBot getting started](https://github.com/thoughtbot/factory_bot/blob/main/GETTING_STARTED.md) — factories are in `test/factories/`
 - [Rails testing guide](https://guides.rubyonrails.org/testing.html)
 
-### Delayed Job
-SEEK uses the [delayed_job_active_record](https://github.com/collectiveidea/delayed_job_active_record) backend. Jobs failing in development appear in the `delayed_jobs` table with a `last_error` column.
+### Solid Queue
+SEEK uses [Solid Queue](https://github.com/rails/solid_queue), with its tables in the main database. Admins can inspect queued, scheduled, failed and finished jobs in the Mission Control dashboard at `/jobs`. Note that SEEK's `ApplicationJob` reports and swallows exceptions, so a failing SEEK job usually shows as *finished* rather than failed — check the log. See [Background Jobs](../background-jobs/#failure-handling).

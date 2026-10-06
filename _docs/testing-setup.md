@@ -341,7 +341,7 @@ Alternative configs for local use: `test/config/database.github.{mysql,postgres,
 
 ### `docker-image.yml` — Docker build and deploy smoke test
 
-Runs on pull requests and pushes to a small set of named branches (`main`, `workflowhub`, and a few others). Builds the full Docker Compose stack (`docker-compose.yml` + `docker-compose.build.yml`), waits 2 minutes for workers to start, then runs `script/check_deployment.rb` to verify the app is responding correctly.
+Runs on pull requests and pushes to a small set of named branches (`main`, `workflowhub`, and a few others). Builds the full Docker Compose stack (`docker-compose.yml` + `docker-compose.build.yml`), waits 2 minutes for workers to start, then runs `script/check_deployment.rb` to verify the app is responding correctly. That script checks `/statistics/application_status` for `search is enabled | 8 background job worker processes running` — the count of live Solid Queue workers with every feature queue enabled — so adding or removing a worker in `config/queue.yml` means updating it.
 
 ### `ansible-install.yml` — Ansible installer test
 
@@ -356,6 +356,8 @@ Runs only on pushes to the `ansible` and `full-test-suite` branches (or manually
 **Authorization in factories.** Records built with FactoryBot bypass the policy system. If you write setup code manually (not using FactoryBot), wrap it in `disable_authorization_checks { }` so authorization errors don't interfere with test setup.
 
 **Virtuoso for integration tests.** The `test/integration` suite requires the Virtuoso RDF store. CI provides it automatically; locally you need a running Virtuoso instance configured via `test/config/virtuoso_test_settings.yml`.
+
+**Background jobs use the `:test` adapter.** `config/environments/test.rb` sets `config.active_job.queue_adapter = :test`, so jobs are recorded for `assert_enqueued_with` rather than written to Solid Queue. Tests of the Mission Control dashboard need a real Solid Queue adapter: include the helpers from `test/jobs_dashboard_test_helper.rb` (loaded by `test_helper.rb`) and call `setup_jobs_dashboard` / `teardown_jobs_dashboard`. The recurring schedule is covered by `test/integration/recurring_test.rb`, which parses `config/recurring.yml` and fails on any entry it doesn't assert — update it when adding a recurring job.
 
 **Large test files.** Some controller test files are very large (e.g. `data_files_controller_test.rb` is ~185 KB). Run a specific test by name with `-n` when iterating on a single case.
 

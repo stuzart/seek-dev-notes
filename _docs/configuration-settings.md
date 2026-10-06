@@ -82,7 +82,7 @@ The largest settings page — controls which SEEK services, resource types, and 
 | `smtp` (enable_starttls_auto) | — | Enable STARTTLS if server supports it. |
 | `smtp` (user_name) | — | SMTP auth username (encrypted). |
 | `smtp` (password) | — | SMTP auth password (encrypted). |
-| `exception_notification_enabled` | false | Emails a list of recipients when a 500 error occurs. |
+| `exception_notification_enabled` | false | Emails a list of recipients when a 500 error occurs. Honoured in any environment, not only production — though where `consider_all_requests_local` is true (development) controller errors are re-raised to the debug page instead. Parameters matching `config.filter_parameters` (including `Authorization` headers, via `:authoriz`) are filtered from the email. |
 | `exception_notification_recipients` | — | Space/comma-separated email addresses for error notifications. |
 | `error_grouping_enabled` | true | Suppresses duplicate error emails within a time window. |
 | `error_grouping_timeout` | 2 minutes | Quiet period after an error before the same error is emailed again. |
