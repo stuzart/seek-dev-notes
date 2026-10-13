@@ -65,7 +65,7 @@ The largest settings page — controls which SEEK services, resource types, and 
 | `filtering_enabled` | true | Enables faceted filtering on index pages. |
 | `max_filters` | 5 | Maximum number of active filters shown at once. |
 | `pdf_conversion_enabled` | true | Enables server-side PDF conversion of uploaded documents (requires LibreOffice). |
-| `fair_signposting_enabled` | false | Adds FAIR Signposting `Link` headers to resource responses. |
+| `fair_signposting_enabled` | false | Adds FAIR Signposting `Link` headers to asset show pages (index and home page links are sent regardless). See [FAIR Signposting](../fair-signposting/). |
 | `external_search_adaptors` | `{}` | Per-adaptor hash enabling external search sources alongside Solr. |
 
 #### Email
@@ -164,7 +164,7 @@ Each toggle hides or shows the corresponding resource type throughout the UI —
 | `isa_json_compliance_enabled` | false | Enables ISA-JSON compliance templates. |
 | `fair_data_station_enabled` | false | Enables FAIR Data Station integration. |
 | `openbis_enabled` | false | Enables OpenBIS integration. |
-| `ga4gh_trs_api_enabled` | false | Exposes a GA4GH Tool Registry Service API for Workflows. |
+| `ga4gh_trs_api_enabled` | false | Exposes a GA4GH Tool Registry Service API for Workflows at `/ga4gh/trs/v2/`. Also needed for the "Run on Galaxy" button. See [GA4GH TRS API](../ga4gh-trs-api/). |
 | `require_cookie_consent` | false | Shows a cookie consent banner before setting any non-essential cookies. |
 
 #### Analytics

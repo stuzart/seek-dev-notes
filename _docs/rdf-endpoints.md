@@ -74,15 +74,13 @@ A `before_action :rdf_enabled?` filter returns `406 Not Acceptable` with a descr
 
 ## FAIR signposting
 
-Every HTML response for an RDF-capable resource includes a `Link` header advertising the RDF representation — the [FAIR Signposting](https://signposting.org/FAIR/) pattern:
+When `fair_signposting_enabled` is on, the show page of an RDF-capable asset includes a `Link` header advertising the Turtle representation, among its other [FAIR Signposting](https://signposting.org/FAIR/) links:
 
 ```http
-Link: <https://seek.example.org/data_files/42>; rel="describedby"; type="application/rdf"
+Link: <https://seek.example.org/data_files/42?version=1> ; rel="describedby" ; type="text/turtle"
 ```
 
-This allows crawlers and FAIR data tools to discover machine-readable representations without parsing HTML.
-
-`app/controllers/concerns/fair_signposting.rb`
+This allows crawlers and FAIR data tools to discover machine-readable representations without parsing HTML. See [FAIR Signposting](../fair-signposting/) for the full set of links and which pages get them.
 
 ## SPARQL endpoint
 

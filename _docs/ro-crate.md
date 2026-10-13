@@ -182,17 +182,7 @@ The `submit` endpoint is used by WorkflowHub to push workflows into SEEK; it che
 
 ## GA4GH TRS API
 
-The [GA4GH Tool Registry Service v2 API](https://www.ga4gh.org/news/tool-registry-service-api-enabling-the-discovery-of-workflows-together/) exposes workflow crate contents:
-
-```text
-GET /ga4gh/trs/v2/tools/{id}/versions/{version_id}
-  descriptor           → main workflow file from crate
-  tests                → test files (tests/*.json)
-  files?format=zip     → full RO-Crate zip
-  containerfile        → Dockerfile from crate
-```
-
-Each SEEK workflow is presented as a TRS "tool", and the crate's contents are served through the TRS file descriptors.
+The GA4GH TRS API serves a workflow's RO-Crate contents — main descriptor, individual files, tests, `Dockerfile` and the full crate zip — to TRS clients such as Galaxy. See [GA4GH TRS API](../ga4gh-trs-api/).
 
 ## Git Wizard Integration
 

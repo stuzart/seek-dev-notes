@@ -14,7 +14,7 @@ Last reviewed against seek `main` on 2026-10-06 (SEEK 1.19.0-main).
 
 - [ ] **Subscriptions and notifications** — `Subscribable`, the email job chain, project/programme subscription model
 - [ ] **FAIR Data Station import** — turtle upload pipeline, `FairDataStationImportJob`, auto-creating extended metadata types from RDF predicates
-- [ ] **Workflow support** — `Workflow`, `WorkflowClass`, extractor adapters (CWL, Snakemake, Galaxy, Nextflow), Life Monitor integration, GA4GH TRS endpoint
+- [ ] **Workflow support** — `Workflow`, `WorkflowClass`, extractor adapters (CWL, Snakemake, Galaxy, Nextflow), Life Monitor integration (the GA4GH TRS endpoint now has its own page)
 - [ ] **Templates and ISA JSON compliance** — `Template` / `TemplateAttribute`, how templates seed SampleTypes, `inherited_from_template_attribute?`, `is_isa_json_compliant?`, and the global template units work (#2622, #2489). Currently only touched on from the Samples page.
 - [ ] **Activity logs and stats** — `ActivityLog`, stats subsystem, dashboard stats, `view_count` / `download_count` / `run_count`. *Now partly surfaced through the JSON API `meta.metrics` object (#2726).*
 - [ ] **Asset pipeline** — Sprockets setup, page-scoped bundles (the COPASI/Plotly simulation bundle, #2703), JS minification during precompilation
@@ -30,6 +30,8 @@ Last reviewed against seek `main` on 2026-10-06 (SEEK 1.19.0-main).
 
 ## Completed
 
+- [x] **GA4GH TRS API** — routes, `Tool`/`ToolVersion`/`FileWrapper` decorators, filtering and pagination, descriptor types, file access from the RO-Crate, Galaxy `trs_import`, permissions as 404s
+- [x] **FAIR Signposting** — which pages get `Link` headers, the link types and their conditions, header construction and `after_action` ordering, gotchas
 - [x] **Solid Queue migration** — [Background Jobs](_docs/background-jobs.md) rewritten for Solid Queue: `queue.yml` topology, `recurring.yml` schedule (replacing `whenever`), supervisor and `seek:workers:*` tasks, Mission Control dashboard at `/jobs`, failure semantics, and the Delayed::Job upgrade path (#2656, #2739)
 - [x] **Caching and Redis** — `Seek::RedisConfig`, the `RedisWithFileOverflowStore` hybrid cache, settings cache, Redis sessions, `Rack::Attack` throttle store, `CacheOverflowCleanupJob`, monitoring
 - [x] **Authorization & Policy system** — `PolicyBasedAuthorization`, `Permission`, `Policy` model; access control underpins almost every controller action
