@@ -82,7 +82,7 @@ Required fields: `title`, `type`, `ID`. The `ID` value is the database ID of the
 
 ### Valid `type` values
 
-```
+```text
 String · Text · Integer · Float · Boolean · Date · DateTime
 Seek Strain · Seek Sample · Seek Sample (multiple)
 Seek Data file · Seek SOP
@@ -201,7 +201,7 @@ The admin reviews the proposed JSON on the confirmation screen (controller actio
 
 Once an `ExtendedMetadataType` is matched or created, the writer (`lib/seek/fair_data_station/writer.rb`) calls `populate_extended_metadata` on each entity. This walks the annotation predicates, looks up the matching attribute by `pid`, and writes the value into `json_metadata`. Nested types are handled recursively.
 
-```
+```text
 RDF predicate URI  →  ExtendedMetadataAttribute.pid  →  json_metadata key
 ```
 

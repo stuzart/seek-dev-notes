@@ -78,7 +78,7 @@ The bulk of triples come from `lib/seek/rdf/rdf_mappings.csv`. Each row maps a m
 
 Example rows:
 
-```
+```text
 *,title,RDF::Vocab::DC.title,l,,
 *,description,RDF::Vocab::DC.description,l,,compact
 *,contributors,JERMVocab.hasContributor,u,,compact
@@ -133,7 +133,7 @@ The full JERM ontology is at `config/ontologies/JERM.rdf`.
 
 Whether or not Virtuoso is configured, a Turtle file is always written to disk:
 
-```
+```text
 {Seek::Config.rdf_filestore_path}/
 ├── public/
 │   └── DataFile-production-42.rdf

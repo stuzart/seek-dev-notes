@@ -10,7 +10,7 @@ SEEK exposes a [JSON:API](https://jsonapi.org) compliant REST API. All HTML cont
 
 Requests and responses follow the JSON:API specification:
 
-```
+```text
 Content-Type: application/vnd.api+json
 Accept: application/vnd.api+json
 ```
@@ -92,7 +92,7 @@ Three authentication schemes are supported.
 
 Generate tokens at *My Profile → Actions → API Tokens*. Tokens are 40-character URL-safe Base64 strings; only a SHA256 hash is stored in the database.
 
-```
+```text
 Authorization: Token <api_token_value>
 ```
 
@@ -102,7 +102,7 @@ Failed lookups in production incur a 2-second delay to slow brute-force attempts
 
 ### HTTP Basic Auth
 
-```
+```text
 Authorization: Basic base64(login:password)
 ```
 
@@ -154,7 +154,7 @@ ActiveModelSerializers.config.key_transform = :unaltered
 
 ### Hierarchy
 
-```
+```text
 ActiveModel::Serializer
   └─ SimpleBaseSerializer      # id, title, type, timestamps
       └─ BaseSerializer        # + policy, tags, extended_attributes, submitter
@@ -206,7 +206,7 @@ For performance, list (`index`) responses use `SkeletonSerializer`, which only i
 
 ### Filtering
 
-```
+```text
 GET /data_files?filter[project_id]=1&filter[tag]=genomics
 ```
 
@@ -214,7 +214,7 @@ Available filter keys per resource are defined in `Seek::Filterer`. Common ones:
 
 ### Sorting
 
-```
+```text
 GET /data_files?sort=title           # ascending
 GET /data_files?sort=-created_at     # descending
 GET /data_files?sort=title,-updated_at  # multi-sort
@@ -222,7 +222,7 @@ GET /data_files?sort=title,-updated_at  # multi-sort
 
 ### Pagination
 
-```
+```text
 GET /data_files?page=2&per_page=25
 ```
 
@@ -230,7 +230,7 @@ GET /data_files?page=2&per_page=25
 
 ### Including relationships
 
-```
+```text
 GET /data_files/42?include=projects,people,assays
 ```
 

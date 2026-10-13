@@ -40,7 +40,7 @@ bundle exec rspec spec
 
 ## Directory Structure
 
-```
+```text
 test/
 ├── unit/                        # Model tests (~159 files)
 ├── functional/                  # Controller tests (~70 files)
@@ -211,7 +211,7 @@ end
 
 Tests that exercise code making real HTTP calls use VCR cassettes — recorded YAML files that capture the full request/response and replay it on subsequent runs. Cassettes live in `test/vcr_cassettes/`, organised by external service:
 
-```
+```text
 test/vcr_cassettes/
 ├── doi/          # DataCite, CrossRef
 ├── feedjira/     # RSS/Atom feed fetching

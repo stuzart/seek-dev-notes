@@ -190,7 +190,7 @@ Remote versions are always immutable (`mutable: false`) since they are snapshots
 
 ## File Storage
 
-```
+```text
 {Seek::Config.git_filestore_path}/
 └── {uuid}/
     └── .git/          ← bare git repository (Rugged operates directly here)

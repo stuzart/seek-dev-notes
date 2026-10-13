@@ -10,7 +10,7 @@ For the Rails behaviour that makes these models work — authorization, search i
 
 ## The Hierarchy
 
-```
+```text
 Programme
 └── Project (one or more per Investigation)
     └── Investigation

@@ -44,7 +44,7 @@ The parent record's attributes are kept in sync with the latest version row. Col
 
 ### Version Lifecycle
 
-```
+```text
 First save
   → parent row created (version = 1)
   → DataFile::Version row created (version = 1)

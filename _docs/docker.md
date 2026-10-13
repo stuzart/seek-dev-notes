@@ -52,7 +52,7 @@ Base image: `ruby:3.3-slim-trixie`
 
 Installs runtime OS packages that must be present at both build and run time:
 
-```
+```text
 curl, default-mysql-client, gettext, git, graphviz,
 libjemalloc2, libreoffice, libvips, links, locales,
 nodejs, openjdk-21-jre, poppler-utils, postgresql-client,
@@ -265,7 +265,7 @@ Used at runtime (copied to `config/database.yml` by `use_mysql_db`). Credentials
 
 Read by the `redis_store` service (to set its password and `maxmemory`) and by `seek` / `seek_workers` (to build the same connection URL):
 
-```
+```shell
 REDIS_PASSWORD=seek_redis_password
 REDIS_HOST=redis_store
 REDIS_MAXMEMORY=256mb

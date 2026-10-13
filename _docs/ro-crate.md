@@ -158,14 +158,14 @@ The `WorkflowCrateExtractor` can also detect an existing SEEK workflow by matchi
 
 ### Download
 
-```
+```text
 GET /workflows/:id/ro_crate           → download as zip
 GET /workflows/:id/ro_crate_metadata  → download ro-crate-metadata.json only
 ```
 
 ### Create
 
-```
+```text
 POST /workflows/create_from_ro_crate              → UI: new workflow from crate zip
 POST /workflows/:id/create_version_from_ro_crate  → UI: new version from crate zip
 POST /workflows/submit                            → detect existing or create new
@@ -173,7 +173,7 @@ POST /workflows/submit                            → detect existing or create 
 
 ### API
 
-```
+```text
 POST /workflows            # with ro_crate param → create via JSON API
 POST /workflows/:id/create_version  # with ro_crate param → new version via API
 ```
@@ -184,7 +184,7 @@ The `submit` endpoint is used by WorkflowHub to push workflows into SEEK; it che
 
 The [GA4GH Tool Registry Service v2 API](https://www.ga4gh.org/news/tool-registry-service-api-enabling-the-discovery-of-workflows-together/) exposes workflow crate contents:
 
-```
+```text
 GET /ga4gh/trs/v2/tools/{id}/versions/{version_id}
   descriptor           → main workflow file from crate
   tests                → test files (tests/*.json)

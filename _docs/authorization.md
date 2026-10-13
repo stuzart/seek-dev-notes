@@ -58,7 +58,7 @@ When the contributor is a group (e.g. a `Project`), the permission applies to al
 
 When a person belongs to multiple groups that each have a permission on the same asset, precedence determines which permission wins:
 
-```
+```text
 Person > FavouriteGroup > WorkGroup > Project > Programme > Institution
 ```
 
@@ -118,7 +118,7 @@ State checks are model-specific overrides. For example, an Assay with linked sam
 
 Policy checks are expensive when applied to large lists (index pages, search results). When `Seek::Config.auth_lookup_enabled` is true, SEEK maintains a pre-computed `#{type}_auth_lookup` table for each asset type:
 
-```
+```text
 user_id | asset_id | can_view | can_download | can_edit | can_manage | can_delete
 ```
 

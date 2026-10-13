@@ -35,7 +35,7 @@ All storage lives under a single configurable root: `Seek::Config.filestore_path
 
 The full directory tree beneath it:
 
-```
+```text
 {filestore_path}/
 ├── assets/                   ← uploaded file content
 │   └── {uuid}.dat

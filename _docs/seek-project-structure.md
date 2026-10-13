@@ -8,7 +8,7 @@ SEEK is a Rails application. The source lives at `/home/sowen/development/ruby/s
 
 ## Top-level layout
 
-```
+```text
 seek/
 ├── app/                   # Rails MVC + jobs, serializers, validators
 ├── config/                # Routes, initializers, YAML configs

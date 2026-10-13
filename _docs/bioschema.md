@@ -10,7 +10,7 @@ SEEK embeds [Schema.org](https://schema.org) and [BioSchemas](https://bioschemas
 
 The system lives entirely in `lib/seek/bio_schema/`. It uses a decorator pattern: a thin `Serializer` class picks the right decorator for a resource and calls it to produce a JSON-LD hash.
 
-```
+```text
 resource.to_schema_ld
   └─ Serializer.new(resource)
       └─ Factory → ResourceDecorators::{Type}
@@ -53,7 +53,7 @@ end
 
 ## Decorator Hierarchy
 
-```
+```text
 BaseDecorator
   └─ Thing                  # @id, name, url, description, image, keywords
       ├─ CreativeWork        # + version, license, creator, dateCreated, DOI…
@@ -213,7 +213,7 @@ In production, serialization errors are silently swallowed; in development they 
 
 Every supported resource controller responds to the `.jsonld` format:
 
-```
+```text
 GET /data_files/42.jsonld
 GET /people/123.jsonld
 GET /workflows/7.jsonld

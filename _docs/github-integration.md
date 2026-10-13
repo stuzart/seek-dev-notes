@@ -32,13 +32,13 @@ end
 
 **Converts web URLs to raw content URLs.** A web URL like:
 
-```
+```text
 https://github.com/bob/workflows/blob/master/dir/workflow.cwl
 ```
 
 is transparently rewritten to:
 
-```
+```text
 https://raw.githubusercontent.com/bob/workflows/master/dir/workflow.cwl
 ```
 

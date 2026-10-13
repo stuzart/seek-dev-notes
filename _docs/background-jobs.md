@@ -256,7 +256,7 @@ The status panel shows the supervisor pid and the list of queues being served by
 
 `live_job_workers` reads from the database, so it works from the web front end even when the workers run in a separate container. `/statistics/application_status` uses it:
 
-```
+```text
 FAIRDOM-SEEK is running | search is enabled | 8 background job worker processes running
 ```
 

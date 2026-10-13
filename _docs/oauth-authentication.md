@@ -176,7 +176,7 @@ Callback URL to register in the GitHub OAuth App: `{seek_base_url}/auth/github/c
 
 ## Routes
 
-```
+```text
 POST /auth/:provider                   → OmniAuth initiates the flow
 GET  /auth/:provider/callback          → sessions#create (OAuth callback)
 POST /auth/:provider/callback          → sessions#create
